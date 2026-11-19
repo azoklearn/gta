@@ -7,21 +7,33 @@ import { ArrowRight, LinkIcon } from "./Icons";
 
 type Busy = { kind: "link" } | { kind: "upload"; progress: number } | null;
 
+type Reply = { id?: string; error?: string };
+
+/** Lit la réponse du serveur sans jamais planter : une réponse vide ou non JSON devient un message clair. */
+function parseReply(text: string, status: number): Reply {
+  try {
+    const data: unknown = JSON.parse(text);
+    if (data && typeof data === "object") return data as Reply;
+  } catch {
+    // Réponse vide ou page d'erreur de l'hébergeur : traité ci-dessous.
+  }
+  return {
+    error:
+      status === 404 || status === 405
+        ? "Le service de découpage n'est pas disponible sur ce site."
+        : `Le serveur de découpage ne répond pas correctement (erreur ${status}). Réessaie dans un instant.`,
+  };
+}
+
 /** Envoie un fichier en suivant l'avancement, ce que `fetch` ne permet pas. */
-function uploadFile(file: File, onProgress: (p: number) => void): Promise<{ id?: string; error?: string }> {
+function uploadFile(file: File, onProgress: (p: number) => void): Promise<Reply> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/jobs/upload");
     xhr.setRequestHeader("x-filename", encodeURIComponent(file.name));
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
-    xhr.onload = () => {
-      try {
-        resolve(JSON.parse(xhr.responseText));
-      } catch {
-        resolve({ error: "Le serveur a renvoyé une réponse inattendue." });
-      }
-    };
+    xhr.onload = () => resolve(parseReply(xhr.responseText, xhr.status));
     xhr.onerror = () => resolve({ error: "L'envoi du fichier a échoué. Vérifie ta connexion." });
     xhr.send(file);
   });
@@ -49,11 +61,18 @@ export function UrlForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      const data = (await res.json()) as { id?: string; error?: string };
+      const data = parseReply(await res.text(), res.status);
       if (!res.ok || !data.id) throw new Error(data.error ?? "Le découpage n'a pas pu être lancé.");
       router.push(`/projets/${data.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Le découpage n'a pas pu être lancé.");
+      // `fetch` échoue avec une TypeError quand le serveur est injoignable.
+      setError(
+        err instanceof TypeError
+          ? "Impossible de joindre le serveur. Vérifie ta connexion et réessaie."
+          : err instanceof Error
+            ? err.message
+            : "Le découpage n'a pas pu être lancé.",
+      );
       setBusy(null);
     }
   }

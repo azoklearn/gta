@@ -8,11 +8,20 @@ import { config } from "@/lib/server/config";
 import { createJob, enqueue, jobDir, removeExpiredJobs } from "@/lib/server/jobs";
 import { refuseIfBusy } from "@/lib/server/limits";
 import { runJob } from "@/lib/server/pipeline";
+import { refuseIfUnavailable, unexpectedError } from "@/lib/server/preflight";
 
 const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
 
 /** Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage. */
 export async function POST(request: Request) {
+  try {
+    return await receive(request);
+  } catch (err) {
+    return unexpectedError(err);
+  }
+}
+
+async function receive(request: Request): Promise<Response> {
   let rawName = request.headers.get("x-filename") ?? "";
   try {
     rawName = decodeURIComponent(rawName);
@@ -28,7 +37,7 @@ export async function POST(request: Request) {
   const tooLarge = Response.json({ error: `Ce fichier dépasse la taille maximale de ${maxMb} Mo.` }, { status: 413 });
   if (Number(request.headers.get("content-length") ?? 0) > config.maxUploadBytes) return tooLarge;
   if (!request.body) return Response.json({ error: "Aucun fichier reçu." }, { status: 400 });
-  const refusal = refuseIfBusy(request);
+  const refusal = (await refuseIfUnavailable("upload")) ?? refuseIfBusy(request);
   if (refusal) return refusal;
 
   const id = randomUUID();
@@ -59,7 +68,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Le fichier reçu est vide." }, { status: 400 });
   }
 
-  void removeExpiredJobs();
+  void removeExpiredJobs().catch(() => {});
   const title = rawName.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Vidéo importée";
   const job = await createJob({ kind: "upload", title }, id);
   enqueue(job.id, runJob);

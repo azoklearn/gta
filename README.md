@@ -56,6 +56,8 @@ Variables d'environnement, toutes facultatives :
 
 Le découpage tourne dans le processus Node et écrit sur le disque local : il faut un serveur qui reste allumé (VPS, Railway, Fly.io, Render…), pas un hébergement sans serveur comme Vercel. Le `Dockerfile` installe ffmpeg et yt-dlp ; il n'a pas encore été construit ni testé.
 
+Avant chaque découpage, le serveur vérifie qu'il peut écrire dans son dossier de travail et que ffmpeg et yt-dlp sont installés ; sinon le formulaire affiche la raison au lieu de lancer un traitement voué à l'échec.
+
 YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Dans ce cas, renseigne `YTDLP_COOKIES` ou `YTDLP_PROXY` ; l'import de fichier fonctionne dans tous les cas.
 
 ## Limites connues
