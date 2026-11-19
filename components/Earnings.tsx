@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Check } from "./Icons";
-import { SectionHeading } from "./Section";
 
 const VIEW_STEPS = [1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000, 500_000, 1_000_000];
 const DAYS_PER_MONTH = 30;
@@ -13,10 +12,10 @@ const plain = new Intl.NumberFormat("fr-FR");
 
 const REQUIREMENTS = [
   "Avoir 18 ans ou plus",
-  "10 000 abonnés sur ton compte",
-  "100 000 vues sur les 30 derniers jours",
+  "10 000 abonnés",
+  "100 000 vues sur 30 jours",
   "Des vidéos de plus d'une minute",
-  "Du contenu original, que tu as transformé",
+  "Du contenu original",
 ];
 
 function Slider({
@@ -42,10 +41,10 @@ function Slider({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="text-sm font-semibold text-mist">
+        <label htmlFor={id} className="text-[15px] text-white/60">
           {label}
         </label>
-        <output htmlFor={id} className="font-display text-2xl tracking-wide text-white">
+        <output htmlFor={id} className="display text-xl tabular-nums text-white">
           {display}
         </output>
       </div>
@@ -71,22 +70,26 @@ export function Earnings() {
   const [rpmCents, setRpmCents] = useState(60);
 
   const views = VIEW_STEPS[viewsIdx];
-  const monthlyViews = perDay * DAYS_PER_MONTH * views;
+  const shortsPerMonth = perDay * DAYS_PER_MONTH;
+  const monthlyViews = shortsPerMonth * views;
   const monthly = (monthlyViews / 1000) * (rpmCents / 100);
 
   return (
-    <section id="revenus" className="relative isolate overflow-hidden py-20 sm:py-28">
-      <div className="absolute left-1/2 top-1/3 -z-10 h-96 w-[50rem] max-w-full -translate-x-1/2 rounded-full bg-cash/10 blur-[140px]" />
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="Rémunération TikTok" title="Combien ça peut" accent="rapporter ?">
-          Avec le programme Creator Rewards, TikTok paie les créateurs pour chaque millier de vues qualifiées sur
-          leurs vidéos de plus d&apos;une minute. Fais le calcul avec tes chiffres.
-        </SectionHeading>
+    <section id="revenus" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <div className="overflow-hidden rounded-[32px] bg-ink text-white shadow-float">
+        <div className="grid lg:grid-cols-[1.1fr_1fr]">
+          {/* Réglages */}
+          <div className="p-7 sm:p-12">
+            <p className="text-sm font-medium text-pink">Rémunération TikTok</p>
+            <h2 className="display mt-3 text-[clamp(2rem,5vw,2.9rem)] leading-[1.08]">
+              Combien ça peut rapporter ?
+            </h2>
+            <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/60">
+              Avec le programme Creator Rewards, TikTok paie chaque millier de vues qualifiées sur les vidéos de
+              plus d&apos;une minute. Fais le calcul avec tes chiffres.
+            </p>
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-[1.15fr_1fr]">
-          {/* Simulateur */}
-          <div className="rounded-3xl border border-line bg-panel p-6 sm:p-9">
-            <div className="space-y-8">
+            <div className="mt-10 space-y-8">
               <Slider
                 id="per-day"
                 label="Shorts publiés par jour"
@@ -99,7 +102,7 @@ export function Earnings() {
               />
               <Slider
                 id="views"
-                label="Vues qualifiées par short (moyenne)"
+                label="Vues qualifiées par short"
                 display={plain.format(views)}
                 min={0}
                 max={VIEW_STEPS.length - 1}
@@ -109,7 +112,7 @@ export function Earnings() {
               />
               <Slider
                 id="rpm"
-                label="RPM : revenu pour 1 000 vues qualifiées"
+                label="Revenu pour 1 000 vues (RPM)"
                 display={`${(rpmCents / 100).toFixed(2).replace(".", ",")} €`}
                 min={20}
                 max={120}
@@ -118,51 +121,47 @@ export function Earnings() {
                 onChange={setRpmCents}
               />
             </div>
+          </div>
 
-            <div className="mt-9 rounded-2xl border border-cash/25 bg-night/60 p-6 text-center" aria-live="polite">
-              <p className="text-sm font-semibold uppercase tracking-widest text-mist">Revenu estimé</p>
-              <p className="mt-1 font-display text-6xl leading-none tracking-wide sm:text-7xl">
-                <span className="text-cash">{euros.format(monthly)}</span>
-                <span className="ml-2 text-2xl text-mist sm:text-3xl">/ mois</span>
+          {/* Résultat */}
+          <div className="flex flex-col justify-between border-t border-white/10 bg-white/[0.04] p-7 sm:p-12 lg:border-l lg:border-t-0">
+            <div aria-live="polite">
+              <p className="text-[15px] text-white/60">Revenu mensuel estimé</p>
+              <p className="display mt-2 text-[clamp(3.5rem,9vw,5.25rem)] leading-none tabular-nums text-cash-bright">
+                {euros.format(monthly)}
               </p>
-              <p className="mt-4 text-sm text-mist">
-                {compact.format(monthlyViews)} vues par mois · soit environ{" "}
-                <strong className="text-white">{euros.format(monthly * 12)}</strong> par an
-              </p>
+              <dl className="mt-8 divide-y divide-white/10 border-y border-white/10 text-[15px]">
+                {[
+                  ["Shorts publiés par mois", plain.format(shortsPerMonth)],
+                  ["Vues qualifiées par mois", compact.format(monthlyViews)],
+                  ["Par short publié", euros.format(monthly / shortsPerMonth)],
+                  ["Sur un an", euros.format(monthly * 12)],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex justify-between py-3.5">
+                    <dt className="text-white/60">{k}</dt>
+                    <dd className="font-medium tabular-nums">{v}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-
-            <p className="mt-4 text-xs leading-relaxed text-mist/75">
+            <p className="mt-8 text-[13px] leading-relaxed text-white/45">
               Simulation indicative, sans garantie de revenus. Le RPM varie selon ton audience, ton pays et la
               durée de visionnage ; seules les vues jugées qualifiées par TikTok sont rémunérées.
             </p>
           </div>
-
-          {/* Conditions */}
-          <div className="flex flex-col gap-5">
-            <div className="rounded-3xl border border-line bg-panel p-6 sm:p-8">
-              <h3 className="font-display text-2xl uppercase tracking-wide">Ce que TikTok demande</h3>
-              <ul className="mt-5 space-y-3.5">
-                {REQUIREMENTS.map((r) => (
-                  <li key={r} className="flex items-start gap-3 text-mist">
-                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-cash/15">
-                      <Check className="h-3 w-3 text-cash" />
-                    </span>
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex-1 rounded-3xl border border-pink/30 bg-gradient-to-br from-pink/15 via-panel to-panel p-6 sm:p-8">
-              <h3 className="font-display text-2xl uppercase tracking-wide">
-                Mode <span className="text-sunset">monétisation</span>
-              </h3>
-              <p className="mt-3 leading-relaxed text-mist">
-                Un short de 45 secondes ne rapporte rien. ViceClip cale chaque découpe au-dessus de la minute et
-                garde le rythme pour que les spectateurs restent jusqu&apos;au bout.
-              </p>
-            </div>
-          </div>
         </div>
+      </div>
+
+      {/* Conditions du programme */}
+      <div className="mt-5 flex flex-col gap-4 rounded-[24px] border border-black/5 bg-white px-7 py-6 shadow-card lg:flex-row lg:items-center lg:gap-8">
+        <p className="display shrink-0 text-lg">Ce que TikTok demande</p>
+        <ul className="flex flex-wrap gap-x-6 gap-y-2.5 text-[15px] text-body">
+          {REQUIREMENTS.map((r) => (
+            <li key={r} className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-cash" /> {r}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

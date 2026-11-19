@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Manrope } from "next/font/google";
+import { Instrument_Sans, Inter } from "next/font/google";
 import "./globals.css";
 
-const anton = Anton({
-  variable: "--font-anton",
-  weight: "400",
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -20,12 +19,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0612",
+  themeColor: "#f7f6f4",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${anton.variable} ${manrope.variable} antialiased`}>
+    <html lang="fr" className={`${instrument.variable} ${inter.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );

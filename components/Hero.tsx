@@ -1,58 +1,64 @@
-import { gameImages } from "@/lib/images";
-import { GameImage } from "./GameImage";
-import { Check, Star } from "./Icons";
-import { Pipeline } from "./Pipeline";
+import { AppMockup } from "./AppMockup";
+import { ReelsGlyph, Star, TikTokGlyph, YouTubeGlyph } from "./Icons";
 import { UrlForm } from "./UrlForm";
+
+function Tile({ className, children }: { className: string; children: React.ReactNode }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`absolute hidden h-16 w-16 animate-drift place-items-center rounded-[18px] bg-white shadow-float xl:grid ${className}`}
+    >
+      {children}
+    </span>
+  );
+}
 
 export function Hero() {
   return (
-    <section id="top" className="relative isolate overflow-hidden pb-20 pt-32 sm:pt-40">
-      {/* Fond : visuel du jeu + voile sombre */}
-      <div className="absolute inset-0 -z-10">
-        <GameImage
-          src={gameImages.hero}
-          alt=""
-          priority
-          sizes="100vw"
-          position="center 35%"
-          className="h-[44rem] w-full opacity-50 [mask-image:linear-gradient(to_bottom,black_35%,transparent_95%)]"
-        />
-        <div className="absolute inset-x-0 top-0 h-[44rem] bg-gradient-to-b from-night/70 via-night/50 to-transparent" />
-        <div className="absolute left-1/2 top-24 h-80 w-[42rem] max-w-full -translate-x-1/2 rounded-full bg-pink/25 blur-[120px]" />
-      </div>
+    <section id="top" className="relative isolate overflow-hidden pb-16 pt-32 sm:pb-24 sm:pt-40">
+      <div className="sky absolute inset-x-0 top-0 -z-10 h-[52rem]" />
 
-      <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-        <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sun backdrop-blur">
-          <Star className="h-3.5 w-3.5" />
-          Le découpeur de shorts GTA 6
-        </p>
+      <Tile className="left-[5%] top-44 -rotate-12">
+        <TikTokGlyph className="h-9 w-9" />
+      </Tile>
+      <Tile className="left-[9%] top-[24rem] rotate-6 [animation-delay:-3s]">
+        <ReelsGlyph className="h-9 w-9" />
+      </Tile>
+      <Tile className="right-[6%] top-60 rotate-12 [animation-delay:-5s]">
+        <YouTubeGlyph className="h-10 w-10" />
+      </Tile>
 
-        <h1 className="mt-6 font-display text-[clamp(2.9rem,10.5vw,6.75rem)] uppercase leading-[0.95] tracking-wide">
-          Un lien YouTube.
-          <br />
-          <span className="text-sunset">Des shorts qui paient.</span>
-        </h1>
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="inline-flex flex-col items-center gap-2 text-[15px] font-medium text-ink/80 sm:flex-row">
+            <span className="flex gap-0.5 text-pink" aria-hidden="true">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Star key={i} className="h-4 w-4" />
+              ))}
+            </span>
+            Le découpeur de shorts pensé pour GTA 6
+          </p>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-mist sm:text-xl">
-          ViceClip découpe n&apos;importe quelle vidéo GTA 6 en shorts verticaux prêts à poster : moments forts
-          repérés par IA, recadrage 9:16, sous-titres. Tu publies,{" "}
-          <strong className="font-bold text-white">TikTok te rémunère aux vues</strong>.
-        </p>
+          <h1 className="display mt-5 text-balance text-[clamp(2.4rem,7.2vw,4.4rem)] leading-[1.04]">
+            Tes vidéos GTA&nbsp;6 deviennent <br className="hidden md:block" />
+            <span className="bg-gradient-to-r from-pink to-orange bg-clip-text pb-[0.12em] text-transparent max-md:block">
+              des shorts qui rapportent
+            </span>
+          </h1>
 
-        <div className="mt-9">
-          <UrlForm />
+          <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-body sm:text-lg">
+            Colle un lien YouTube. ViceClip repère les meilleurs moments, les recadre en 9:16 et ajoute les
+            sous-titres. <strong className="font-semibold text-ink">Tu publies, TikTok te rémunère aux vues.</strong>
+          </p>
+
+          <div className="mt-9">
+            <UrlForm />
+          </div>
+          <p className="mt-4 text-sm text-muted">3 shorts offerts · Sans carte bancaire</p>
         </div>
 
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-mist">
-          {["3 shorts offerts", "Sans carte bancaire", "Shorts de +1 min, éligibles à la rémunération"].map((t) => (
-            <li key={t} className="flex items-center gap-1.5">
-              <Check className="h-4 w-4 text-cash" /> {t}
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-16 sm:mt-20">
-          <Pipeline />
+        <div className="mx-auto mt-12 max-w-5xl sm:mt-16">
+          <AppMockup />
         </div>
       </div>
     </section>

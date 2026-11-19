@@ -1,33 +1,28 @@
-import { ArrowRight } from "./Icons";
+import Image from "next/image";
 import { gameImages } from "@/lib/images";
-import { GameImage } from "./GameImage";
+import { ButtonLink } from "./Button";
 
 export function FinalCta() {
   return (
-    <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-28">
-      <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 px-6 py-16 text-center sm:px-12 sm:py-24">
-        <div className="absolute inset-0 -z-20">
-          <GameImage
-            src={gameImages.cta}
-            variant="night"
-            sizes="(min-width: 1152px) 1104px, 100vw"
-            className="h-full w-full"
-          />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-night/70" />
-        <h2 className="mx-auto max-w-3xl font-display text-4xl uppercase leading-none tracking-wide sm:text-6xl">
-          La hype GTA 6 n&apos;attend pas. <span className="text-sunset">Tes shorts non plus.</span>
+    <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
+      <div className="relative isolate overflow-hidden rounded-[32px] px-7 py-16 shadow-float sm:px-14 sm:py-24">
+        <Image
+          src={gameImages.cta}
+          alt="Capture officielle de GTA VI : Vice City au crépuscule"
+          fill
+          sizes="(min-width: 1152px) 1104px, 100vw"
+          className="-z-20 object-cover object-[50%_40%]"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/10" />
+        <h2 className="display max-w-xl text-[clamp(2rem,5.4vw,3.25rem)] leading-[1.06] text-white">
+          La hype GTA&nbsp;6 n&apos;attend pas. Tes shorts non plus.
         </h2>
-        <p className="mx-auto mt-5 max-w-xl text-lg text-white/85">
+        <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
           Colle ton premier lien et récupère 3 shorts offerts, prêts à poster.
         </p>
-        <a
-          href="#top"
-          className="group mt-9 inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-lg font-extrabold text-night transition hover:bg-sun active:scale-[0.98]"
-        >
+        <ButtonLink href="#top" variant="light" className="mt-8">
           Découper ma première vidéo
-          <ArrowRight className="h-5 w-5 transition group-hover:translate-x-0.5" />
-        </a>
+        </ButtonLink>
       </div>
     </section>
   );

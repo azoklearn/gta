@@ -1,4 +1,4 @@
-import { SectionHeading } from "./Section";
+import { Plus } from "./Icons";
 
 const QUESTIONS = [
   {
@@ -7,7 +7,7 @@ const QUESTIONS = [
   },
   {
     q: "Combien de temps prend le découpage ?",
-    a: "Quelques minutes pour une vidéo standard. Tu reçois une série de shorts classés par Score Wanted, à télécharger un par un ou tous ensemble.",
+    a: "Quelques minutes pour une vidéo standard. Tu reçois une série de shorts classés par score Wanted, à télécharger un par un ou tous ensemble.",
   },
   {
     q: "Quelles vidéos puis-je utiliser ?",
@@ -25,23 +25,25 @@ const QUESTIONS = [
 
 export function Faq() {
   return (
-    <section id="faq" className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
-      <SectionHeading eyebrow="FAQ" title="Questions" accent="fréquentes" />
-      <div className="mt-12 space-y-3">
-        {QUESTIONS.map(({ q, a }) => (
-          <details key={q} className="group rounded-2xl border border-line bg-panel open:border-pink/40">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-base font-bold sm:p-6 sm:text-lg [&::-webkit-details-marker]:hidden">
-              {q}
-              <span
-                aria-hidden="true"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xl leading-none text-pink transition group-open:rotate-45"
-              >
-                +
-              </span>
-            </summary>
-            <p className="px-5 pb-5 leading-relaxed text-mist sm:px-6 sm:pb-6">{a}</p>
-          </details>
-        ))}
+    <section id="faq" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+        <div>
+          <h2 className="display text-[clamp(2rem,5vw,2.9rem)] leading-[1.08]">Questions fréquentes</h2>
+          <p className="mt-4 max-w-sm text-[17px] leading-relaxed text-body">
+            L&apos;essentiel à savoir avant de coller ton premier lien.
+          </p>
+        </div>
+        <div className="border-t border-black/10">
+          {QUESTIONS.map(({ q, a }) => (
+            <details key={q} className="group border-b border-black/10">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-[17px] font-semibold tracking-tight sm:text-lg [&::-webkit-details-marker]:hidden">
+                {q}
+                <Plus className="h-5 w-5 shrink-0 text-muted transition group-open:rotate-45 group-open:text-pink" />
+              </summary>
+              <p className="max-w-2xl pb-6 leading-relaxed text-body">{a}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ const PLANS = [
     tagline: "Pour publier tous les jours",
     features: [
       "150 shorts par mois",
-      "Mode monétisation (+1 min)",
+      "Découpes de plus d'une minute",
       "Titres et hashtags générés",
       "Sans filigrane",
       "Traitement prioritaire",
@@ -33,47 +33,47 @@ const PLANS = [
 
 export function Pricing() {
   return (
-    <section id="tarifs" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-      <SectionHeading eyebrow="Tarifs" title="Rentabilisé dès" accent="le premier short viral">
-        Sans engagement. Commence avec 3 shorts offerts, passe à l&apos;offre supérieure quand ton compte décolle.
+    <section id="tarifs" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <SectionHeading title="Rentabilisé dès le premier short viral">
+        Sans engagement. Commence avec 3 shorts offerts, change d&apos;offre quand ton compte décolle.
       </SectionHeading>
 
-      <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-3">
+      <div className="mt-12 grid items-stretch gap-4 sm:gap-5 lg:grid-cols-3">
         {PLANS.map((p) => (
           <div
             key={p.name}
-            className={`relative flex flex-col rounded-3xl p-8 ${
-              p.featured
-                ? "border-2 border-pink bg-gradient-to-b from-pink/15 to-panel shadow-[0_0_80px_-20px_rgb(255_62_165/0.6)]"
-                : "border border-line bg-panel"
+            className={`flex flex-col rounded-[28px] p-8 ${
+              p.featured ? "bg-ink text-white shadow-float" : "border border-black/5 bg-white shadow-card"
             }`}
           >
-            {p.featured && (
-              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-sunset px-4 py-1 text-xs font-extrabold uppercase tracking-widest text-white">
-                Le plus choisi
-              </span>
-            )}
-            <h3 className="font-display text-3xl uppercase tracking-wide">{p.name}</h3>
-            <p className="mt-1 text-sm text-mist">{p.tagline}</p>
-            <p className="mt-6 flex items-baseline gap-1">
-              <span className="font-display text-6xl leading-none tracking-wide">{p.price} €</span>
-              <span className="text-mist">/ mois</span>
+            <div className="flex items-center justify-between">
+              <h3 className="display text-2xl">{p.name}</h3>
+              {p.featured && (
+                <span className="rounded-full bg-pink px-3 py-1 text-xs font-semibold text-white">Le plus choisi</span>
+              )}
+            </div>
+            <p className={`mt-1 text-[15px] ${p.featured ? "text-white/60" : "text-body"}`}>{p.tagline}</p>
+            <p className="mt-7 flex items-baseline gap-1.5">
+              <span className="display text-6xl leading-none tabular-nums">{p.price} €</span>
+              <span className={p.featured ? "text-white/60" : "text-muted"}>/ mois</span>
             </p>
-            <ul className="mt-7 flex-1 space-y-3">
-              {p.features.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-[15px] text-white/90">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-cash" /> {f}
-                </li>
-              ))}
-            </ul>
             <a
               href="#top"
-              className={`mt-8 inline-flex h-12 items-center justify-center rounded-full text-base font-extrabold transition active:scale-[0.98] ${
-                p.featured ? "bg-sunset text-white hover:brightness-110" : "bg-white/10 text-white hover:bg-white/20"
+              className={`mt-7 inline-flex h-12 items-center justify-center rounded-[14px] text-[15px] font-semibold transition active:scale-[0.98] ${
+                p.featured
+                  ? "bg-white text-ink hover:bg-white/90"
+                  : "bg-ink text-white shadow-button hover:bg-black"
               }`}
             >
               Choisir {p.name}
             </a>
+            <ul className={`mt-7 flex-1 space-y-3 border-t pt-7 ${p.featured ? "border-white/10" : "border-black/[0.07]"}`}>
+              {p.features.map((f) => (
+                <li key={f} className={`flex items-start gap-3 text-[15px] ${p.featured ? "text-white/85" : "text-body"}`}>
+                  <Check className={`mt-0.5 h-4 w-4 shrink-0 ${p.featured ? "text-pink" : "text-ink"}`} /> {f}
+                </li>
+              ))}
+            </ul>
           </div>
         ))}
       </div>

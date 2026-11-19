@@ -1,22 +1,15 @@
 /**
- * Emplacements d'images de la landing page.
- *
- * Les fichiers sont dans `public/images/` (visuels officiels de GTA VI,
- * © Rockstar Games). Pour en changer un, remplace le fichier ou son chemin.
- * Une entrée à `null` affiche une illustration vectorielle « Vice City ».
+ * Visuels de la landing page, stockés dans `public/images/`.
+ * Ce sont des visuels officiels de GTA VI (© Rockstar Games).
+ * Pour en changer un, remplace le fichier ou modifie son chemin ici.
  */
-export const gameImages: {
-  /** Grand visuel d'ambiance derrière le titre (paysage, 1920 px de large mini). */
-  hero: string | null;
-  /** Vignette de la « vidéo YouTube source » (16:9). */
-  source: string | null;
-  /** Les trois shorts générés (idéalement des images qui se recadrent bien en 9:16). */
-  clips: [string | null, string | null, string | null];
-  /** Visuel du bandeau d'appel à l'action en bas de page (paysage). */
-  cta: string | null;
-} = {
-  hero: "/images/hero.jpg",
+export const gameImages = {
+  /** Vignette 16:9 de la vidéo YouTube source, dans la maquette du hero. */
   source: "/images/source.jpg",
+  /** Les trois shorts générés (portraits, recadrés en 9:16). */
   clips: ["/images/clip-1.jpg", "/images/clip-2.jpg", "/images/clip-3.jpg"],
-  cta: "/images/cta.jpg",
-};
+  /** Capture de jeu en paysage utilisée pour montrer le recadrage 9:16. */
+  reframe: "/images/reframe.jpg",
+  /** Vue de Vice City au crépuscule, derrière l'appel à l'action final. */
+  cta: "/images/city.jpg",
+} as const;
