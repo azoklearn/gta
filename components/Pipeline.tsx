@@ -10,7 +10,7 @@ const CLIPS = [
     caption: ["IL SÈME", "5 ÉTOILES"],
     stars: 5,
     length: "1:04",
-    position: "30% center",
+    position: "45% center",
     tilt: "-rotate-3 sm:translate-y-4",
     anim: "animate-float",
   },
@@ -32,7 +32,7 @@ const CLIPS = [
     caption: ["CASCADE", "IMPOSSIBLE"],
     stars: 4,
     length: "1:01",
-    position: "70% center",
+    position: "55% center",
     tilt: "rotate-3 sm:translate-y-6",
     anim: "animate-float",
   },
@@ -47,7 +47,7 @@ export function Pipeline() {
         <div className="relative">
           <GameImage
             src={gameImages.source}
-            alt="Vidéo de gameplay GTA 6 sur YouTube"
+            alt="Visuel officiel de GTA VI : Jason et Lucia devant un coucher de soleil"
             sizes="(min-width: 1024px) 480px, 100vw"
             className="aspect-video w-full"
           />

@@ -21,15 +21,7 @@ Le site est servi sur http://localhost:3000.
 
 ## Images
 
-Les emplacements d'images sont déclarés dans `lib/images.ts`. Tant qu'un emplacement vaut `null`, une illustration vectorielle (`components/ViceScene.tsx`) est affichée. Pour utiliser un visuel, dépose le fichier dans `public/images/` et renseigne son chemin :
-
-```ts
-export const gameImages = {
-  hero: "/images/hero.jpg",
-  source: "/images/source.jpg",
-  clips: ["/images/clip-1.jpg", "/images/clip-2.jpg", "/images/clip-3.jpg"],
-};
-```
+Les emplacements d'images sont déclarés dans `lib/images.ts` et les fichiers sont dans `public/images/`. Ce sont des visuels officiels de GTA VI récupérés sur rockstargames.com ; ils appartiennent à Rockstar Games. Pour en changer un, remplace le fichier ou modifie son chemin. Une entrée à `null` affiche à la place une illustration vectorielle (`components/ViceScene.tsx`).
 
 ## À ajuster
 
