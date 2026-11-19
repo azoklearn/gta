@@ -111,7 +111,9 @@ export function AccountView() {
             <p className="text-sm text-muted">Offre</p>
             <p className="display mt-1 text-3xl">{plan ? plan.name : "Essai gratuit"}</p>
             <p className="mt-2 text-[15px] text-ink-soft">
-              {plan
+              {plan && account.gifted
+                ? `Accès offert, sans paiement. Tes shorts sont remis à neuf le ${until}.`
+                : plan
                 ? account.subscription === "canceled"
                   ? `Résiliée : elle reste active jusqu'au ${until}, puis s'arrête sans nouveau prélèvement.`
                   : `${plan.price} € par mois, prochain prélèvement le ${until}.`

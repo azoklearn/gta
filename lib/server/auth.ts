@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
-import { type Account, findPlan, FREE_TRIAL, type PlanId } from "@/lib/plans";
+import { type Account, findPlan, FREE_TRIAL, PLANS, type PlanId } from "@/lib/plans";
+import { config } from "./config";
 import { db, type UserRow } from "./db";
 import { isJobId } from "./jobs";
 
@@ -60,7 +61,7 @@ export function signUp(body: unknown): { token: string; user: UserRow } {
   db()
     .prepare("INSERT INTO users (id, email, password_hash, created_at, credits) VALUES (?, ?, ?, ?, ?)")
     .run(id, email, hashPassword(password), Date.now(), FREE_TRIAL.shorts);
-  return { token: openSession(id), user: getUser(id)! };
+  return { token: openSession(id), user: withGift(getUser(id)!) };
 }
 
 export function logIn(body: unknown): { token: string; user: UserRow } {
@@ -69,7 +70,7 @@ export function logIn(body: unknown): { token: string; user: UserRow } {
   // Le mot de passe est vérifié même si le compte n'existe pas, pour ne pas révéler quelles adresses sont inscrites.
   const ok = passwordMatches(password, user?.password_hash ?? hashPassword("inconnu", "00"));
   if (!user || !ok) throw new AccountError("Adresse e-mail ou mot de passe incorrect.", 401);
-  return { token: openSession(user.id), user };
+  return { token: openSession(user.id), user: withGift(expireIfOverdue(user)) };
 }
 
 function bearer(request: Request): string | null {
@@ -94,7 +95,24 @@ export function currentUser(request: Request): UserRow | null {
     .get(sha256(token)) as { user_id: string; expires_at: number } | undefined;
   if (!session || session.expires_at < Date.now()) return null;
   const user = getUser(session.user_id);
-  return user ? expireIfOverdue(user) : null;
+  return user ? withGift(expireIfOverdue(user)) : null;
+}
+
+const GIFT_DAYS = 30;
+
+/**
+ * Offre la formule la plus haute aux comptes listés dans `VICECLIP_FREE_ACCOUNTS`, sans paiement.
+ * Le quota de shorts est remis à neuf tous les 30 jours. Un compte qui paie déjà un abonnement
+ * n'est pas touché.
+ */
+function withGift(user: UserRow): UserRow {
+  if (!config.freeAccounts.has(user.email) || user.subscription_status === "active") return user;
+  const top = PLANS[PLANS.length - 1];
+  if (user.subscription_status === "gift" && user.plan === top.id && (user.period_end ?? 0) > Date.now()) return user;
+  db()
+    .prepare("UPDATE users SET plan = ?, credits = ?, period_end = ?, subscription_status = 'gift', payment_failed = 0 WHERE id = ?")
+    .run(top.id, top.shortsPerMonth, Date.now() + GIFT_DAYS * 24 * 3600 * 1000, user.id);
+  return getUser(user.id)!;
 }
 
 /**
@@ -158,6 +176,7 @@ export function toAccount(user: UserRow, jobTtlHours: number): Account {
     periodEnd: user.period_end,
     subscription: user.subscription_status === "active" || user.subscription_status === "canceled" ? user.subscription_status : null,
     paymentFailed: Boolean(user.payment_failed),
+    gifted: user.subscription_status === "gift",
     projects,
   };
 }

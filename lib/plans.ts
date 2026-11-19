@@ -43,6 +43,8 @@ export interface Account {
   subscription: "active" | "canceled" | null;
   /** Le dernier prélèvement a échoué ; Mollie réessaie automatiquement. */
   paymentFailed: boolean;
+  /** Offre accordée gratuitement, sans abonnement. */
+  gifted?: boolean;
   /** Projets récents, du plus récent au plus ancien. */
   projects: { id: string; title: string; createdAt: number }[];
 }

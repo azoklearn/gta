@@ -25,6 +25,13 @@ export const config = {
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
   /** Modèle qui écrit le titre, la description et les hashtags de chaque short. */
   titleModel: process.env.VICECLIP_TITLE_MODEL || "claude-opus-5-5",
+  /** Adresses e-mail des comptes qui reçoivent l'offre la plus haute gratuitement (séparées par des virgules). */
+  freeAccounts: new Set(
+    (process.env.VICECLIP_FREE_ACCOUNTS || "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  ),
   /** Durée maximale d'une vidéo source, en minutes. */
   maxSourceMinutes: num(process.env.VICECLIP_MAX_MINUTES, 90),
   /**

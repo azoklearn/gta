@@ -72,6 +72,7 @@ Variables d'environnement, toutes facultatives (elles gardent le préfixe `VICEC
 | `MOLLIE_API_KEY` | Clé d'API Mollie (`test_…` pour les essais, `live_…` en production). Sans elle, les abonnements sont désactivés | aucune |
 | `ANTHROPIC_API_KEY` | Clé d'API Anthropic, pour le titre, la description et les hashtags écrits par l'IA. Sans elle, les shorts sortent sans titre | aucune |
 | `VICECLIP_TITLE_MODEL` | Modèle Claude qui écrit les titres | `claude-opus-5-5` |
+| `VICECLIP_FREE_ACCOUNTS` | Adresses e-mail (séparées par des virgules) des comptes qui reçoivent l'offre la plus haute gratuitement, quota remis à neuf tous les 30 jours | aucune |
 | `VICECLIP_PUBLIC_URL` | Adresse publique du serveur, appelée par Mollie pour ses notifications | déduite de `RAILWAY_PUBLIC_DOMAIN` |
 | `VICECLIP_MAX_MINUTES` | Plafond du serveur pour la durée d'une vidéo source, quelle que soit l'offre | `90` |
 | `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir `POST /api/jobs/upload` : quand YouTube refuse une vidéo, la page du projet propose alors d'envoyer le fichier. Sans ce réglage, le site n'accepte que les liens | fermée |
