@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config";
@@ -16,9 +17,70 @@ export interface VideoInfo {
 /** Une erreur dont le message peut être montré tel quel à l'utilisateur. */
 export class UserError extends Error {}
 
-function baseArgs(): string[] {
+/** Le réglage accepte le fichier de cookies tel quel ou encodé en base64. */
+function decodeCookies(value: string): string {
+  const text = value.trim();
+  if (text.includes("\t") || text.startsWith("#")) return text;
+  return Buffer.from(text, "base64").toString("utf8").trim();
+}
+
+/** Contenu du réglage `YTDLP_COOKIES_TEXT`, ou une chaîne vide s'il n'a pas la forme d'un fichier de cookies. */
+function cookiesText(): string {
+  if (!config.ytdlpCookiesText.trim()) return "";
+  const text = decodeCookies(config.ytdlpCookiesText);
+  return text.includes("\t") ? text : "";
+}
+
+/** Vrai si le serveur s'identifie auprès de YouTube avec les cookies d'un compte. */
+export function youtubeAccountReady(): boolean {
+  return Boolean(config.ytdlpCookies || cookiesText());
+}
+
+let cookiesFile: Promise<string | null> | null = null;
+
+/**
+ * Chemin du fichier de cookies transmis à yt-dlp, ou `null` s'il n'y en a pas.
+ *
+ * Le contenu donné par `YTDLP_COOKIES_TEXT` est écrit sur le disque persistant. yt-dlp met ce fichier
+ * à jour quand YouTube renouvelle la session : il n'est donc réécrit que si le réglage a changé, pour
+ * ne pas remplacer une session à jour par celle, plus ancienne, du réglage.
+ */
+function cookies(): Promise<string | null> {
+  cookiesFile ??= (async () => {
+    if (config.ytdlpCookies) return config.ytdlpCookies;
+    const text = cookiesText();
+    if (!text) {
+      if (config.ytdlpCookiesText.trim()) {
+        console.error("[gtaclip] YTDLP_COOKIES_TEXT n'est pas un fichier de cookies au format Netscape : il est ignoré.");
+      }
+      return null;
+    }
+    const file = path.join(config.dbDir, "youtube-cookies.txt");
+    const mark = `${file}.empreinte`;
+    const print = createHash("sha256").update(text).digest("hex");
+    const known = await fs.readFile(mark, "utf8").catch(() => "");
+    const present = await fs.stat(file).then(
+      () => true,
+      () => false,
+    );
+    if (known !== print || !present) {
+      await fs.mkdir(config.dbDir, { recursive: true });
+      await fs.writeFile(file, `${text}\n`, { mode: 0o600 });
+      await fs.writeFile(mark, print, { mode: 0o600 });
+    }
+    return file;
+  })().catch((err) => {
+    console.error("[gtaclip] le fichier de cookies YouTube n'a pas pu être préparé", err);
+    cookiesFile = null;
+    return null;
+  });
+  return cookiesFile;
+}
+
+async function baseArgs(): Promise<string[]> {
   const args = ["--no-playlist", "--no-warnings", "--js-runtimes", "node"];
-  if (config.ytdlpCookies) args.push("--cookies", config.ytdlpCookies);
+  const file = await cookies();
+  if (file) args.push("--cookies", file);
   if (config.ytdlpProxy) args.push("--proxy", config.ytdlpProxy);
   return args;
 }
@@ -29,6 +91,9 @@ function explain(err: unknown): Error {
   const text = err.stderr;
   if (/introuvable sur le serveur/.test(text)) return new UserError("yt-dlp n'est pas installé sur le serveur.");
   if (/not a bot|Sign in to confirm|HTTP Error 429|This content isn.t available, try again later/i.test(text)) {
+    if (youtubeAccountReady()) {
+      console.error("[gtaclip] YouTube refuse la vidéo malgré le compte connecté : ses cookies ont peut-être expiré.");
+    }
     return new UserError(
       "YouTube refuse pour l'instant de fournir ses vidéos à notre serveur (protection anti-robot). Aucun short n'a été décompté de ton offre : réessaie un peu plus tard.",
     );
@@ -78,7 +143,8 @@ function pickSubtitles(language: string | undefined, manual: Tracks, automatic: 
 }
 
 export async function fetchInfo(url: string): Promise<VideoInfo> {
-  const raw = await withRetries(() => capture(config.ytdlp, [...baseArgs(), "--skip-download", "--dump-single-json", url]));
+  const base = await baseArgs();
+  const raw = await withRetries(() => capture(config.ytdlp, [...base, "--skip-download", "--dump-single-json", url]));
   const info = JSON.parse(raw) as {
     id: string;
     title?: string;
@@ -112,7 +178,7 @@ export async function download(
   onProgress: (p: number) => void,
 ): Promise<{ video: string; subtitles: string | null }> {
   const args = [
-    ...baseArgs(),
+    ...(await baseArgs()),
     "-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b",
     "--merge-output-format", "mp4",
     "-o", "source.%(ext)s",

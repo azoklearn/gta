@@ -4,6 +4,7 @@ import { billingReady } from "./billing";
 import { config } from "./config";
 import { capture } from "./exec";
 import { titlesReady } from "./titles";
+import { youtubeAccountReady } from "./youtube";
 
 type Check = { at: number; problems: { hosting?: string; ffmpeg?: string; ytdlp?: string } };
 
@@ -73,6 +74,7 @@ export async function refuseIfUnavailable(source: "youtube" | "upload"): Promise
 export async function serverHealth(): Promise<{
   ok: boolean;
   youtube: boolean;
+  youtubeAccount: boolean;
   facecam: boolean;
   billing: boolean;
   titles: boolean;
@@ -82,6 +84,8 @@ export async function serverHealth(): Promise<{
   return {
     ok: !problems.hosting && !problems.ffmpeg,
     youtube: !problems.hosting && !problems.ffmpeg && !problems.ytdlp,
+    // Sans compte connecté, YouTube refuse souvent les téléchargements venant d'un centre de données.
+    youtubeAccount: youtubeAccountReady(),
     // La mise en page « facecam en haut » demande Python et OpenCV ; sans eux les shorts restent en plein écran.
     facecam: await capture(config.python, ["-c", "import cv2, numpy; cv2.CascadeClassifier"]).then(
       () => true,

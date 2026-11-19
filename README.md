@@ -80,7 +80,8 @@ Variables d'environnement, toutes facultatives (elles gardent le préfixe `VICEC
 | `VICECLIP_JOB_TTL_HOURS` | Durée de conservation des shorts | `24` |
 | `NEXT_PUBLIC_VICECLIP_API` | Adresse du serveur de découpage, quand il est séparé du site | aucune (même serveur) |
 | `VICECLIP_ALLOWED_ORIGINS` | Sites autorisés à appeler le serveur de découpage | aucun |
-| `YTDLP_COOKIES` | Fichier de cookies transmis à yt-dlp | aucun |
+| `YTDLP_COOKIES_TEXT` | Contenu du fichier de cookies d'un compte YouTube dédié (format Netscape, tel quel ou en base64) : le serveur s'identifie avec ce compte. C'est un secret | aucun |
+| `YTDLP_COOKIES` | Variante : chemin d'un fichier de cookies déjà présent sur le serveur | aucun |
 | `YTDLP_PROXY` | Proxy transmis à yt-dlp | aucun |
 | `FFMPEG_PATH`, `FFPROBE_PATH`, `YTDLP_PATH`, `PYTHON_PATH` | Chemins des outils | ceux du `PATH` |
 
@@ -107,7 +108,15 @@ Déploie le `Dockerfile` et pointe ton domaine dessus, sans régler `NEXT_PUBLIC
 
 Avant chaque découpage, le serveur vérifie qu'il peut écrire dans son dossier de travail et que ffmpeg et yt-dlp sont installés ; sinon le formulaire affiche la raison au lieu de lancer un traitement voué à l'échec.
 
-YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Le serveur relance automatiquement ; si le refus persiste, les liens ne passent pas : c'est la principale limite actuelle du service (voir `YTDLP_COOKIES` et `YTDLP_PROXY`).
+YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Le serveur relance automatiquement ; si le refus persiste, les liens ne passent pas : c'est la principale limite actuelle du service.
+
+Pour que le serveur s'identifie auprès de YouTube, connecte-lui un compte dédié (jamais un compte personnel : il peut être restreint) :
+
+1. Dans une fenêtre de navigation privée, connecte-toi à YouTube avec ce compte, puis exporte les cookies de `youtube.com` au format Netscape (`cookies.txt`) avec une extension de navigateur prévue pour cela. Ferme ensuite la fenêtre sans te déconnecter.
+2. Colle le contenu du fichier dans la variable `YTDLP_COOKIES_TEXT` du serveur de découpage, puis redéploie.
+3. `/api/health` doit répondre `"youtubeAccount": true`.
+
+Le serveur garde ces cookies sur son disque persistant et les laisse se renouveler ; ils finissent quand même par expirer, il faut alors recommencer l'export. Les journaux signalent un refus de YouTube « malgré le compte connecté ».
 
 ## Limites connues
 

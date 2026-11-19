@@ -49,5 +49,10 @@ export const config = {
   python: process.env.PYTHON_PATH || "python3",
   /** Fichier de cookies et proxy facultatifs pour yt-dlp, utiles si YouTube bloque l'adresse du serveur. */
   ytdlpCookies: process.env.YTDLP_COOKIES || "",
+  /**
+   * Contenu d'un fichier de cookies YouTube (format Netscape, tel quel ou encodé en base64), pour les
+   * hébergeurs où l'on ne peut pas déposer de fichier. C'est un secret : il donne accès au compte.
+   */
+  ytdlpCookiesText: process.env.YTDLP_COOKIES_TEXT || "",
   ytdlpProxy: process.env.YTDLP_PROXY || "",
 };
