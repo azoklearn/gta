@@ -160,6 +160,40 @@ export async function startJob(url: string): Promise<{ id?: string; error?: stri
   return { error: reply.data.error ?? "Le découpage n'a pas pu être lancé.", status: reply.status };
 }
 
+/**
+ * Envoie un fichier vidéo au serveur et lance son découpage. Sert de secours quand YouTube refuse
+ * de fournir la vidéo. `onProgress` reçoit l'avancement de l'envoi, de 0 à 1.
+ */
+export function uploadVideo(file: File, onProgress: (ratio: number) => void): Promise<{ id?: string; error?: string }> {
+  return new Promise((resolve) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", apiUrl("/api/jobs/upload"));
+    const token = readToken();
+    if (token) request.setRequestHeader("Authorization", `Bearer ${token}`);
+    request.setRequestHeader("Content-Type", "application/octet-stream");
+    request.setRequestHeader("X-Filename", encodeURIComponent(file.name));
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    request.onerror = () => resolve({ error: "L'envoi a été interrompu. Vérifie ta connexion et réessaie." });
+    request.onload = () => {
+      let data: { id?: string; error?: string } = {};
+      try {
+        data = JSON.parse(request.responseText);
+      } catch {
+        // Réponse illisible : traitée comme un échec ci-dessous.
+      }
+      if (request.status < 300 && data.id) {
+        void refreshAccount();
+        resolve({ id: data.id });
+      } else {
+        resolve({ error: data.error ?? "Le fichier n'a pas pu être envoyé." });
+      }
+    };
+    request.send(file);
+  });
+}
+
 /** Ouvre la page de paiement Mollie pour une offre. Renvoie un message d'erreur si elle n'a pas pu être préparée. */
 export async function startCheckout(plan: PlanId): Promise<string | null> {
   const reply = await call<{ checkoutUrl?: string }>("/api/billing/checkout", { plan });

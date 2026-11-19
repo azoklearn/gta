@@ -1,3 +1,4 @@
+import { config } from "@/lib/server/config";
 import { preflight, withCors } from "@/lib/server/cors";
 import { queuePosition, readJob } from "@/lib/server/jobs";
 
@@ -11,7 +12,13 @@ export async function GET(request: Request, ctx: RouteContext<"/api/jobs/[id]">)
   return withCors(
     request,
     Response.json(
-      { ...job, userId: undefined, queuePosition: job.status === "queued" ? queuePosition(id) : 0 },
+      {
+        ...job,
+        userId: undefined,
+        queuePosition: job.status === "queued" ? queuePosition(id) : 0,
+        // L'envoi d'un fichier n'est proposé en secours que si le serveur l'autorise.
+        canUpload: config.allowUpload,
+      },
       { headers: { "Cache-Control": "no-store" } },
     ),
   );

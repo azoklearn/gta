@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { uploadVideo } from "@/lib/account";
 import { apiUrl } from "@/lib/api";
 import type { Clip, Job, JobStep } from "@/lib/types";
 import { ButtonLink } from "./Button";
 import { Check, Download, WantedStars } from "./Icons";
 import { SiteHeader } from "./SiteHeader";
 
-type JobState = Job & { queuePosition: number };
+type JobState = Job & { queuePosition: number; canUpload?: boolean };
 type Load = { kind: "loading" } | { kind: "missing" } | { kind: "ready"; job: JobState };
 
 const STEP_LABELS: Record<JobStep, string> = {
@@ -212,6 +215,86 @@ function Notice({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
+/** Secours quand YouTube refuse de fournir la vidéo : l'utilisateur envoie lui-même le fichier. */
+function UploadFallback({ message }: { message?: string }) {
+  const router = useRouter();
+  const input = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(file: File | undefined) {
+    if (!file || progress !== null) return;
+    setError(null);
+    setProgress(0);
+    const reply = await uploadVideo(file, setProgress);
+    if (reply.id) {
+      router.push(`/projets/${reply.id}`);
+      return;
+    }
+    setError(reply.error ?? "Le fichier n'a pas pu être envoyé.");
+    setProgress(null);
+    if (input.current) input.current.value = "";
+  }
+
+  return (
+    <div className="panel mx-auto max-w-xl p-8 text-center">
+      <h1 className="display text-3xl">YouTube bloque notre serveur</h1>
+      <p className="mt-3 leading-relaxed text-ink-soft">{message}</p>
+      <p className="mt-3 leading-relaxed text-ink-soft">
+        Tu as le fichier de la vidéo ? Envoie-le ici : le découpage se lance tout de suite, sans passer par YouTube.
+      </p>
+      <input
+        ref={input}
+        type="file"
+        accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.mkv,.webm,.m4v"
+        className="sr-only"
+        aria-label="Fichier vidéo à découper"
+        onChange={(e) => void send(e.target.files?.[0])}
+      />
+      {progress === null ? (
+        <button
+          type="button"
+          onClick={() => input.current?.click()}
+          className="button-shine mt-7 inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-white px-6 text-[15.5px] font-semibold text-black transition hover:bg-white/90 active:translate-y-px"
+        >
+          Envoyer le fichier vidéo
+        </button>
+      ) : (
+        <div className="mt-7" aria-live="polite">
+          <div
+            className="h-2 rounded-full bg-white/10"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+            aria-label="Envoi du fichier"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-pink to-orange transition-[width] duration-300"
+              style={{ width: `${Math.max(2, progress * 100)}%` }}
+            />
+          </div>
+          <p className="mt-3 text-sm text-muted">
+            Envoi en cours… {Math.round(progress * 100)} %. Garde cette page ouverte.
+          </p>
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="mt-4 text-sm font-medium text-[#ff9b7a]">
+          {error}
+        </p>
+      )}
+      <p className="mt-5 text-[13px] text-muted">
+        MP4, MOV, MKV ou WebM. Ou{" "}
+        <Link href="/#top" className="text-white underline decoration-white/30 underline-offset-4">
+          réessaie le lien plus tard
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
 export function ProjectView({ id }: { id: string }) {
   const load = useJob(id);
 
@@ -229,9 +312,13 @@ export function ProjectView({ id }: { id: string }) {
             </Notice>
           )}
 
-          {load.kind === "ready" && load.job.status === "error" && (
-            <Notice title="Le découpage n'a pas abouti">{load.job.error}</Notice>
-          )}
+          {load.kind === "ready" &&
+            load.job.status === "error" &&
+            (load.job.youtubeBlocked && load.job.canUpload ? (
+              <UploadFallback message={load.job.error} />
+            ) : (
+              <Notice title="Le découpage n'a pas abouti">{load.job.error}</Notice>
+            ))}
 
           {load.kind === "ready" && load.job.status !== "error" && (
             <Results job={load.job} />

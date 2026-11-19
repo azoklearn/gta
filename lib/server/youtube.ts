@@ -17,6 +17,9 @@ export interface VideoInfo {
 /** Une erreur dont le message peut être montré tel quel à l'utilisateur. */
 export class UserError extends Error {}
 
+/** YouTube refuse de fournir la vidéo au serveur : l'utilisateur peut alors envoyer le fichier lui-même. */
+export class YouTubeBlocked extends UserError {}
+
 /** Le réglage accepte le fichier de cookies tel quel ou encodé en base64. */
 function decodeCookies(value: string): string {
   const text = value.trim();
@@ -94,8 +97,8 @@ function explain(err: unknown): Error {
     if (youtubeAccountReady()) {
       console.error("[gtaclip] YouTube refuse la vidéo malgré le compte connecté : ses cookies ont peut-être expiré.");
     }
-    return new UserError(
-      "YouTube refuse pour l'instant de fournir ses vidéos à notre serveur (protection anti-robot). Aucun short n'a été décompté de ton offre : réessaie un peu plus tard.",
+    return new YouTubeBlocked(
+      "YouTube refuse pour l'instant de fournir ses vidéos à notre serveur (protection anti-robot). Aucun short n'a été décompté de ton offre.",
     );
   }
   if (/Private video|members-only|This video is private/i.test(text)) return new UserError("Cette vidéo est privée ou réservée aux membres.");

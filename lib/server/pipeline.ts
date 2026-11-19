@@ -9,7 +9,7 @@ import { clipPath, jobDir, posterPath, readJob, settleJob, updateJob } from "./j
 import { renderClip, renderPoster, renderThumbnail } from "./render";
 import { buildAss, readJson3, type Word } from "./subtitles";
 import { writeCopy } from "./titles";
-import { download, fetchInfo, UserError } from "./youtube";
+import { download, fetchInfo, UserError, YouTubeBlocked } from "./youtube";
 
 const HASHTAGS = ["#gta6", "#gtavi", "#vicecity", "#gaming", "#gtaclips"];
 
@@ -126,7 +126,7 @@ export async function runJob(id: string): Promise<void> {
     if (!(err instanceof UserError)) console.error(`[gtaclip] ${id}`, err);
     // Les refus sont tracés aussi : ils montrent quand YouTube bloque le serveur.
     else console.warn(`[gtaclip] ${id} refusé : ${message}`);
-    await updateJob(id, { status: "error", error: message })
+    await updateJob(id, { status: "error", error: message, youtubeBlocked: err instanceof YouTubeBlocked || undefined })
       .then(settleJob)
       .catch(() => {});
     const source = await findSource(dir).catch(() => null);

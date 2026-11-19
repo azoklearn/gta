@@ -17,7 +17,7 @@ const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
 
 /**
  * Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage.
- * Route d'essai, fermée par défaut (voir `allowUpload` dans la configuration).
+ * Sert de secours quand YouTube refuse de fournir une vidéo ; ouverte avec `VICECLIP_ALLOW_UPLOAD=1`.
  */
 export const POST = api(receive);
 

@@ -74,7 +74,7 @@ Variables d'environnement, toutes facultatives (elles gardent le préfixe `VICEC
 | `VICECLIP_TITLE_MODEL` | Modèle Claude qui écrit les titres | `claude-opus-5-5` |
 | `VICECLIP_PUBLIC_URL` | Adresse publique du serveur, appelée par Mollie pour ses notifications | déduite de `RAILWAY_PUBLIC_DOMAIN` |
 | `VICECLIP_MAX_MINUTES` | Plafond du serveur pour la durée d'une vidéo source, quelle que soit l'offre | `90` |
-| `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir la route d'essai `POST /api/jobs/upload` (import direct d'un fichier, non proposé sur le site) | fermée |
+| `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir `POST /api/jobs/upload` : quand YouTube refuse une vidéo, la page du projet propose alors d'envoyer le fichier. Sans ce réglage, le site n'accepte que les liens | fermée |
 | `VICECLIP_MAX_UPLOAD_MB` | Taille maximale d'un fichier envoyé à la route d'essai | `2048` |
 | `VICECLIP_CLIP_SECONDS` | Durée de chaque short | `64` |
 | `VICECLIP_JOB_TTL_HOURS` | Durée de conservation des shorts | `24` |

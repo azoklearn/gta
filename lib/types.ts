@@ -62,4 +62,6 @@ export interface Job {
   rendered: number;
   clips: Clip[];
   error?: string;
+  /** Vrai si YouTube a refusé de fournir la vidéo au serveur : la page propose alors d'envoyer le fichier. */
+  youtubeBlocked?: boolean;
 }
