@@ -80,7 +80,6 @@ export async function runJob(id: string): Promise<void> {
     const passages = segments.map((segment, i) => ({ index: i + 1, start: segment.start, duration: segment.duration }));
     await renderPoster(source, posterPath(id), segments[0].start + Math.min(2, segments[0].duration / 2)).catch(() => {});
     const copy = await writeCopy(source, dir, job.source, passages, words);
-    progress(1);
 
     const clips: Clip[] = segments.map((segment, i) => {
       const written = copy.get(i + 1);

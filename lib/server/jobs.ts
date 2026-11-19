@@ -33,11 +33,30 @@ export function posterPath(id: string): string {
   return path.join(jobDir(id), "poster.jpg");
 }
 
+let writes = 0;
+
 async function writeJob(job: Job): Promise<void> {
   const file = path.join(jobDir(job.id), "job.json");
-  const tmp = `${file}.${process.pid}.tmp`;
+  // Nom unique par écriture : deux écritures rapprochées ne doivent pas se marcher dessus.
+  const tmp = `${file}.${process.pid}.${++writes}.tmp`;
   await fs.writeFile(tmp, JSON.stringify(job));
   await fs.rename(tmp, file);
+}
+
+const pending = new Map<string, Promise<void>>();
+
+/** Fait passer les modifications d'un même traitement l'une après l'autre, pour qu'aucune ne soit perdue. */
+function inTurn<T>(id: string, task: () => Promise<T>): Promise<T> {
+  const result = (pending.get(id) ?? Promise.resolve()).then(task);
+  const tail = result.then(
+    () => {},
+    () => {},
+  );
+  pending.set(id, tail);
+  void tail.then(() => {
+    if (pending.get(id) === tail) pending.delete(id);
+  });
+  return result;
 }
 
 export async function createJob(
@@ -80,11 +99,13 @@ export async function readJob(id: string): Promise<Job | null> {
   return job;
 }
 
-export async function updateJob(id: string, patch: Partial<Job>): Promise<Job> {
-  const file = path.join(jobDir(id), "job.json");
-  const job: Job = { ...JSON.parse(await fs.readFile(file, "utf8")), ...patch };
-  await writeJob(job);
-  return job;
+export function updateJob(id: string, patch: Partial<Job>): Promise<Job> {
+  return inTurn(id, async () => {
+    const file = path.join(jobDir(id), "job.json");
+    const job: Job = { ...JSON.parse(await fs.readFile(file, "utf8")), ...patch };
+    await writeJob(job);
+    return job;
+  });
 }
 
 /**
