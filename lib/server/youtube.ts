@@ -39,6 +39,24 @@ export function youtubeAccountReady(): boolean {
   return Boolean(config.ytdlpCookies || cookiesText());
 }
 
+/** Vrai si ce contenu porte une session YouTube ouverte (cookies de connexion présents). */
+function signedIn(text: string): boolean {
+  return /\tLOGIN_INFO\t/.test(text) && /\t(__Secure-[13]PSID|SID)\t/.test(text);
+}
+
+/**
+ * Décrit l'état des cookies sans en montrer la valeur, pour comprendre un refus de YouTube :
+ * session présente ou non dans le réglage, et dans le fichier que yt-dlp tient à jour.
+ */
+async function cookiesReport(): Promise<string> {
+  if (config.ytdlpCookies) return "fichier fourni par YTDLP_COOKIES";
+  const setting = cookiesText();
+  if (!setting) return "aucun cookie";
+  const file = await fs.readFile(path.join(config.dbDir, "youtube-cookies.txt"), "utf8").catch(() => "");
+  const say = (ok: boolean) => (ok ? "session présente" : "PAS de session");
+  return `réglage : ${say(signedIn(setting))} ; fichier du serveur : ${say(signedIn(file))}`;
+}
+
 let cookiesFile: Promise<string | null> | null = null;
 
 /**
@@ -123,7 +141,10 @@ async function withRetries<T>(task: () => Promise<T>): Promise<T> {
       return await task();
     } catch (err) {
       const retryable = err instanceof CommandError && /not a bot|Sign in to confirm|HTTP Error 429/i.test(err.stderr);
-      if (!retryable || attempt >= ATTEMPTS) throw explain(err);
+      if (!retryable || attempt >= ATTEMPTS) {
+        if (retryable) console.error(`[gtaclip] cookies YouTube — ${await cookiesReport()}`);
+        throw explain(err);
+      }
       await new Promise((resolve) => setTimeout(resolve, 2500 * attempt));
     }
   }
