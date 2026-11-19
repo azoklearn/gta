@@ -1,6 +1,6 @@
 # ViceClip
 
-ViceClip découpe une vidéo de gameplay GTA 6 en shorts verticaux pour TikTok, Shorts et Reels : on colle un lien YouTube (ou on importe un fichier), le serveur repère les passages les plus intenses, les recadre en 9:16, incruste les sous-titres et propose les shorts au téléchargement.
+ViceClip est un outil de clipping : il transforme les vidéos et les lives GTA 6 de youtubeurs et de streamers en shorts verticaux prêts à poster sur TikTok, Shorts et Reels. On colle un lien YouTube (ou on importe un fichier), le serveur repère les passages les plus intenses, les recadre en 9:16, incruste les sous-titres et propose les shorts au téléchargement.
 
 ## Lancer le projet
 

@@ -158,7 +158,7 @@ export function UrlForm() {
       </div>
 
       <p className="mt-3 text-[13px] text-muted sm:mt-4 sm:text-sm">
-        3 shorts par vidéo · Sans inscription ·{" "}
+        3 shorts par vidéo ·<span className="max-sm:hidden"> Sans inscription ·</span>{" "}
         <button
           type="button"
           onClick={() => fileInput.current?.click()}

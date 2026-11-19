@@ -2,24 +2,24 @@ import { SectionHeading } from "./Section";
 
 const STEPS = [
   {
-    title: "Colle le lien",
-    text: "Un live de trois heures, un let's play, une compilation : toute vidéo GTA 6 hébergée sur YouTube convient.",
+    title: "Choisis une vidéo",
+    text: "Le live, le let's play ou la compilation GTA 6 d'un youtubeur ou d'un streamer, jusqu'à 1 h 30. Colle son lien YouTube ou importe le fichier.",
   },
   {
-    title: "ViceClip découpe",
-    text: "Poursuites, braquages, cascades, fails : les passages qui retiennent l'attention sont isolés, recadrés et sous-titrés.",
+    title: "ViceClip fait les shorts",
+    text: "Poursuites, braquages, cascades, fails : les passages qui retiennent l'attention sont isolés, recadrés en 9:16 et sous-titrés.",
   },
   {
-    title: "Publie et encaisse",
-    text: "Télécharge tes shorts et poste-les sur TikTok, Shorts et Reels. Chaque vue qualifiée compte pour ta rémunération.",
+    title: "Poste et encaisse",
+    text: "Tes shorts sont prêts à poster : télécharge-les et publie-les sur TikTok, Shorts et Reels. Chaque vue qualifiée compte pour ta rémunération.",
   },
 ];
 
 export function Steps() {
   return (
     <section id="fonctionnement" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
-      <SectionHeading title="Trois étapes, zéro montage">
-        Pas de logiciel à installer, pas de timeline à apprendre. Tu donnes la vidéo, tu récupères les shorts.
+      <SectionHeading title="Tu choisis la vidéo, ViceClip fait les shorts">
+        Pas de logiciel de montage, pas de timeline à apprendre. Trois shorts prêts à poster pour chaque vidéo.
       </SectionHeading>
 
       <ol className="mt-9 grid gap-x-10 md:mt-12 md:grid-cols-3">

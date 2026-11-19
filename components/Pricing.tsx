@@ -35,7 +35,7 @@ export function Pricing() {
   return (
     <section id="tarifs" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
       <SectionHeading title="Rentabilisé dès le premier short viral">
-        Sans engagement. Teste gratuitement avec 3 shorts par vidéo, change d&apos;offre quand ton compte décolle.
+        Sans engagement. Teste gratuitement avec 3 shorts par vidéo, change d&apos;offre quand ton compte de clips décolle.
       </SectionHeading>
 
       <div className="mt-9 grid items-stretch gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">

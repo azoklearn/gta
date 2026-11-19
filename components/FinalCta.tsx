@@ -15,13 +15,13 @@ export function FinalCta() {
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/45 sm:via-ink/60 sm:to-ink/10" />
         <h2 className="display max-w-xl text-[clamp(2rem,5.4vw,3.25rem)] leading-[1.06] text-white">
-          La hype GTA&nbsp;6 n&apos;attend pas. Tes shorts non plus.
+          Pendant qu&apos;ils jouent, tes shorts se préparent.
         </h2>
         <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
-          Colle ton premier lien et récupère 3 shorts prêts à poster, sans inscription.
+          Colle la vidéo d&apos;un streamer GTA&nbsp;6 et récupère 3 shorts prêts à poster, sans inscription.
         </p>
         <ButtonLink href="#top" variant="light" className="mt-8 max-sm:w-full max-sm:justify-between">
-          Découper ma première vidéo
+          Créer mes premiers shorts
         </ButtonLink>
       </div>
     </section>

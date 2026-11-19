@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ViceClip — Transforme tes vidéos GTA 6 en shorts TikTok qui paient",
+  title: "ViceClip — Les meilleurs moments des streamers GTA 6, en shorts prêts à poster",
   description:
-    "Colle un lien YouTube : ViceClip découpe n'importe quelle vidéo GTA 6 en shorts verticaux prêts à poster sur TikTok, avec sous-titres, recadrage 9:16 et score de viralité.",
+    "Colle la vidéo d'un youtubeur ou d'un streamer GTA 6 : ViceClip repère les meilleurs moments et te livre des shorts verticaux sous-titrés, prêts à poster et optimisés pour devenir viraux sur TikTok.",
 };
 
 export const viewport: Viewport = {

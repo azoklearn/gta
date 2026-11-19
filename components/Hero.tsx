@@ -36,22 +36,25 @@ export function Hero() {
                 <Star key={i} className="h-4 w-4" />
               ))}
             </span>
-            <span className="sm:hidden">Pensé pour GTA 6</span>
-            <span className="hidden sm:inline">Le découpeur de shorts pensé pour GTA 6</span>
+            <span className="sm:hidden">Le clipping GTA 6, sans montage</span>
+            <span className="hidden sm:inline">Le clipping GTA 6, sans montage ni logiciel</span>
           </p>
 
           <h1 className="display mt-4 text-balance text-[clamp(2.2rem,7.2vw,4.4rem)] leading-[1.04] sm:mt-5">
-            Tes vidéos GTA&nbsp;6 deviennent <br className="hidden md:block" />
-            <span className="bg-gradient-to-r from-pink to-orange box-decoration-clone bg-clip-text pb-[0.12em] text-transparent">
-              des shorts qui rapportent
+            Les streamers jouent à GTA&nbsp;6.
+            <span className="block bg-gradient-to-r from-pink to-orange box-decoration-clone bg-clip-text pb-[0.12em] text-transparent">
+              Toi, tu postes les shorts.
             </span>
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-body sm:mt-6 sm:text-lg">
-            <span className="sm:hidden">Colle un lien YouTube, récupère des shorts 9:16 sous-titrés. </span>
+            <span className="sm:hidden">
+              Colle la vidéo d&apos;un youtubeur ou d&apos;un streamer, récupère des shorts prêts à poster,
+              optimisés pour devenir viraux.{" "}
+            </span>
             <span className="hidden sm:inline">
-              Colle un lien YouTube. ViceClip repère les meilleurs moments, les recadre en 9:16 et ajoute les
-              sous-titres.{" "}
+              Colle la vidéo ou le live d&apos;un youtubeur ou d&apos;un streamer. ViceClip en tire les meilleurs
+              moments et te livre des shorts prêts à poster, optimisés pour devenir viraux.{" "}
             </span>
             <strong className="font-semibold text-ink">Tu publies, TikTok te rémunère aux vues.</strong>
           </p>

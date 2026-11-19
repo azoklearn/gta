@@ -35,7 +35,7 @@ export function AppMockup() {
           </span>
           <p className="min-w-0 flex-1 truncate text-[13px] text-muted">
             Projets <span className="mx-1 text-black/20">/</span>
-            <span className="font-medium text-ink">24 minutes de chaos à Vice City</span>
+            <span className="font-medium text-ink">Live GTA 6 : braquage en direct à Vice City</span>
           </p>
           <span className="hidden items-center gap-1.5 rounded-full bg-pink-soft px-2.5 py-1 text-xs font-semibold text-pink sm:flex">
             <span className="h-1.5 w-1.5 rounded-full bg-pink" /> 3 shorts prêts
@@ -48,7 +48,7 @@ export function AppMockup() {
             <div className="relative overflow-hidden rounded-xl">
               <Image
                 src={gameImages.source}
-                alt="Visuel officiel de GTA VI : Jason et Lucia devant un coucher de soleil"
+                alt="Visuel officiel de GTA VI, utilisé ici comme vidéo d'un streamer"
                 width={1600}
                 height={900}
                 priority
@@ -56,7 +56,7 @@ export function AppMockup() {
                 className="aspect-video w-full object-cover"
               />
               <span className="absolute left-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur">
-                Vidéo source · 16:9
+                Vidéo du streamer · 16:9
               </span>
               <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/25 backdrop-blur-md">
                 <Play className="h-5 w-5 text-white" />
@@ -76,7 +76,7 @@ export function AppMockup() {
               <div className="mt-2 flex items-center justify-between text-[11px] tabular-nums text-muted">
                 <span>0:00</span>
                 <span className="font-medium text-ink">3 moments forts repérés</span>
-                <span>24:18</span>
+                <span>1:24:18</span>
               </div>
             </div>
           </div>

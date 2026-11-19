@@ -24,7 +24,7 @@ export function Footer() {
       </div>
       <p className="mt-6 max-w-3xl text-[13px] leading-relaxed text-muted">
         ViceClip est un outil indépendant, ni affilié ni approuvé par Rockstar Games, Take-Two Interactive ou
-        TikTok. Grand Theft Auto et GTA sont des marques de leurs propriétaires respectifs. Visuels du jeu ©
+        TikTok. Grand Theft Auto et GTA sont des marques de leurs propriétaires respectifs. Les vidéos restent la propriété de leurs créateurs. Visuels du jeu ©
         Rockstar Games.
       </p>
     </footer>
