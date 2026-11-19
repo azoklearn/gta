@@ -19,7 +19,7 @@ const QUESTIONS = [
   },
   {
     q: "Combien de temps prend le découpage ?",
-    a: "Quelques minutes pour une vidéo standard. Tu reçois trois shorts classés par score Wanted, à regarder dans la page puis à télécharger. Ils restent disponibles 24 heures.",
+    a: "Quelques minutes pour une vidéo standard. Tu reçois de 3 à 8 shorts selon ton offre, classés par score Wanted, à regarder dans la page puis à télécharger. Ils restent disponibles 24 heures.",
   },
   {
     q: "Mes shorts auront-ils des sous-titres ?",
@@ -28,6 +28,10 @@ const QUESTIONS = [
   {
     q: "Est-ce que ça marche pour d'autres jeux ?",
     a: "Oui. La détection s'appuie sur le son et l'image : coups de feu, explosions, cris, changements de plan rapides. Elle est réglée pour GTA mais fonctionne sur n'importe quel gameplay.",
+  },
+  {
+    q: "Comment fonctionne l'abonnement ?",
+    a: "Tu commences avec 3 shorts offerts, sans carte bancaire. Ensuite tu choisis une offre mensuelle : ton compteur de shorts est remis à neuf à chaque prélèvement, les shorts non utilisés ne sont pas reportés. Le paiement passe par Mollie et tu peux résilier à tout moment depuis ton compte ; l'offre reste alors active jusqu'à la fin du mois payé.",
   },
   {
     q: "Les revenus affichés sont-ils garantis ?",

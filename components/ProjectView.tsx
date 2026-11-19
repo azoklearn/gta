@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiUrl } from "@/lib/api";
 import type { Clip, Job, JobStep } from "@/lib/types";
 import { ButtonLink } from "./Button";
 import { Check, Download, WantedStars } from "./Icons";
-import { Logo } from "./Logo";
+import { SiteHeader } from "./SiteHeader";
 
 type JobState = Job & { queuePosition: number };
 type Load = { kind: "loading" } | { kind: "missing" } | { kind: "ready"; job: JobState };
@@ -51,24 +50,6 @@ function useJob(id: string): Load {
     };
   }, [id]);
   return load;
-}
-
-function Header() {
-  return (
-    <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4">
-      <nav
-        aria-label="Principale"
-        className="mx-auto flex h-16 max-w-[900px] items-center justify-between rounded-2xl border border-black/5 bg-white/90 pl-4 pr-2.5 shadow-card backdrop-blur-xl sm:pl-5"
-      >
-        <Link href="/" aria-label="ViceClip, accueil">
-          <Logo />
-        </Link>
-        <ButtonLink href="/#top" variant="pink" size="sm">
-          Nouvelle vidéo
-        </ButtonLink>
-      </nav>
-    </header>
-  );
 }
 
 function Progress({ job }: { job: JobState }) {
@@ -235,7 +216,7 @@ export function ProjectView({ id }: { id: string }) {
 
   return (
     <>
-      <Header />
+      <SiteHeader guestLabel="Nouvelle vidéo" />
       <main className="relative isolate min-h-screen pb-20 pt-32 sm:pt-36">
         <div className="sky absolute inset-x-0 top-0 -z-10 h-[30rem] opacity-70" />
         <div className="mx-auto max-w-6xl px-4 sm:px-6">

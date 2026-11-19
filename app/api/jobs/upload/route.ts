@@ -5,11 +5,13 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { config } from "@/lib/server/config";
-import { preflight, withCors } from "@/lib/server/cors";
-import { createJob, enqueue, jobDir, removeExpiredJobs } from "@/lib/server/jobs";
+import { api, requireUser } from "@/lib/server/http";
+import { jobDir } from "@/lib/server/jobs";
+import { launchJob } from "@/lib/server/launch";
 import { refuseIfBusy } from "@/lib/server/limits";
-import { runJob } from "@/lib/server/pipeline";
-import { refuseIfUnavailable, unexpectedError } from "@/lib/server/preflight";
+import { refuseIfUnavailable } from "@/lib/server/preflight";
+
+export { OPTIONS } from "@/lib/server/http";
 
 const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
 
@@ -17,17 +19,7 @@ const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
  * Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage.
  * Route d'essai, fermée par défaut (voir `allowUpload` dans la configuration).
  */
-export async function POST(request: Request) {
-  try {
-    return withCors(request, await receive(request));
-  } catch (err) {
-    return withCors(request, unexpectedError(err));
-  }
-}
-
-export function OPTIONS(request: Request) {
-  return preflight(request);
-}
+export const POST = api(receive);
 
 async function receive(request: Request): Promise<Response> {
   if (!config.allowUpload) {
@@ -48,7 +40,8 @@ async function receive(request: Request): Promise<Response> {
   const tooLarge = Response.json({ error: `Ce fichier dépasse la taille maximale de ${maxMb} Mo.` }, { status: 413 });
   if (Number(request.headers.get("content-length") ?? 0) > config.maxUploadBytes) return tooLarge;
   if (!request.body) return Response.json({ error: "Aucun fichier reçu." }, { status: 400 });
-  const refusal = (await refuseIfUnavailable("upload")) ?? refuseIfBusy(request);
+  const user = requireUser(request);
+  const refusal = (await refuseIfUnavailable("upload")) ?? refuseIfBusy();
   if (refusal) return refusal;
 
   const id = randomUUID();
@@ -79,9 +72,12 @@ async function receive(request: Request): Promise<Response> {
     return Response.json({ error: "Le fichier reçu est vide." }, { status: 400 });
   }
 
-  void removeExpiredJobs().catch(() => {});
   const title = rawName.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Vidéo importée";
-  const job = await createJob({ kind: "upload", title }, id);
-  enqueue(job.id, runJob);
-  return Response.json({ id: job.id }, { status: 201 });
+  try {
+    const job = await launchJob(user, { kind: "upload", title }, id);
+    return Response.json({ id: job.id }, { status: 201 });
+  } catch (err) {
+    await fs.rm(dir, { recursive: true, force: true });
+    throw err;
+  }
 }

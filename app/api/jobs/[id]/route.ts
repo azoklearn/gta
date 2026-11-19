@@ -11,7 +11,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/jobs/[id]">)
   return withCors(
     request,
     Response.json(
-      { ...job, queuePosition: job.status === "queued" ? queuePosition(id) : 0 },
+      { ...job, userId: undefined, queuePosition: job.status === "queued" ? queuePosition(id) : 0 },
       { headers: { "Cache-Control": "no-store" } },
     ),
   );

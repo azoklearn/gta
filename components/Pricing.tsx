@@ -1,84 +1,103 @@
+import { FREE_TRIAL, PLANS, type Plan } from "@/lib/plans";
 import { Check } from "./Icons";
+import { PlanButton } from "./PlanButton";
 import { SectionHeading } from "./Section";
 
-const PLANS = [
-  {
-    name: "Rookie",
-    price: "9",
-    tagline: "Pour tester sur un compte",
-    features: ["30 shorts par mois", "Export 1080p", "Sous-titres automatiques", "Score Wanted"],
-    featured: false,
-  },
-  {
-    name: "Hustler",
-    price: "24",
-    tagline: "Pour publier tous les jours",
-    features: [
-      "150 shorts par mois",
-      "Découpes de plus d'une minute",
-      "Titres et hashtags générés",
-      "Sans filigrane",
-      "Traitement prioritaire",
-    ],
-    featured: true,
-  },
-  {
-    name: "Kingpin",
-    price: "59",
-    tagline: "Pour gérer plusieurs comptes",
-    features: ["Shorts illimités", "Export 4K", "Plusieurs comptes TikTok", "Styles de sous-titres sur mesure"],
-    featured: false,
-  },
-];
+const FEATURED: Plan["id"] = "expert";
+
+function minutes(n: number): string {
+  if (n < 60) return `${n} min`;
+  return n % 60 ? `${Math.floor(n / 60)} h ${n % 60}` : `${n / 60} h`;
+}
+
+const perShort = (plan: Plan) => (plan.price / plan.shortsPerMonth).toFixed(2).replace(".", ",");
+
+function features(plan: Plan, previous: Plan | undefined): string[] {
+  return [
+    `${plan.shortsPerVideo} shorts par vidéo`,
+    `Vidéos jusqu'à ${minutes(plan.maxMinutes)}`,
+    plan.priority >= 3 ? "Priorité maximale dans la file" : plan.priority === 2 ? "Passage prioritaire dans la file" : "Facecam en haut et sous-titres",
+    previous ? `Tout ce qu'il y a dans ${previous.name}` : "Export en 1080 × 1920",
+  ];
+}
+
+function PlanIcon({ id }: { id: Plan["id"] }) {
+  const common = { viewBox: "0 0 32 32", className: "h-9 w-9", "aria-hidden": true } as const;
+  if (id === "clipper") {
+    return (
+      <svg {...common}>
+        <path d="M9 5h14l6 8-13 15L3 13z" fill="#ff8fc1" />
+        <path d="M9 5l-6 8h26l-6-8-7 8z" fill="#ff2e8b" />
+        <path d="M3 13l13 15 0-15z" fill="#ff5fa6" />
+      </svg>
+    );
+  }
+  if (id === "expert") {
+    return (
+      <svg {...common}>
+        <path d="M4 24l-2-13 8 6 6-10 6 10 8-6-2 13z" fill="#ffb347" />
+        <rect x="4" y="24" width="24" height="3.5" rx="1.5" fill="#ff7a3d" />
+        <circle cx="16" cy="19" r="2.2" fill="#ff2e8b" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <path d="M16 2.5l4 8.4 9.2 1.2-6.7 6.4 1.7 9.100L16 23.200l-8.2 4.4 1.7-9.1-6.7-6.4 9.2-1.200z" fill="#ffc94a" />
+      <path d="M16 2.500l4 8.4 9.2 1.2-6.7 6.400L16 16z" fill="#ff9a3d" />
+    </svg>
+  );
+}
 
 export function Pricing() {
   return (
     <section id="tarifs" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
       <SectionHeading title="Rentabilisé dès le premier short viral">
-        Sans engagement. Teste gratuitement avec 3 shorts par vidéo, change d&apos;offre quand ton compte de clips décolle.
+        {FREE_TRIAL.shorts} shorts offerts à l&apos;inscription, sans carte bancaire. Ensuite, un abonnement mensuel sans
+        engagement, résiliable en un clic.
       </SectionHeading>
 
-      <div className="mt-9 grid items-stretch gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">
-        {PLANS.map((p) => (
-          <div
-            key={p.name}
-            className={`flex flex-col rounded-[28px] p-7 sm:p-8 ${
-              p.featured
-                ? "order-first bg-ink text-white shadow-float lg:order-none"
-                : "border border-black/5 bg-white shadow-card"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="display text-2xl">{p.name}</h3>
-              {p.featured && (
-                <span className="rounded-full bg-pink px-3 py-1 text-xs font-semibold text-white">Le plus choisi</span>
-              )}
-            </div>
-            <p className={`mt-1 text-[15px] ${p.featured ? "text-white/60" : "text-body"}`}>{p.tagline}</p>
-            <p className="mt-6 flex items-baseline gap-1.5 sm:mt-7">
-              <span className="display text-5xl leading-none tabular-nums sm:text-6xl">{p.price} €</span>
-              <span className={p.featured ? "text-white/60" : "text-muted"}>/ mois</span>
-            </p>
-            <a
-              href="#top"
-              className={`mt-7 inline-flex h-12 items-center justify-center rounded-[14px] text-[15px] font-semibold transition active:scale-[0.98] ${
-                p.featured
-                  ? "bg-white text-ink hover:bg-white/90"
-                  : "bg-ink text-white shadow-button hover:bg-black"
+      <div className="mx-auto mt-10 grid max-w-5xl items-stretch gap-5 sm:mt-14 lg:grid-cols-3 lg:gap-6">
+        {PLANS.map((plan, i) => {
+          const featured = plan.id === FEATURED;
+          return (
+            <div
+              key={plan.id}
+              className={`relative flex flex-col rounded-[22px] bg-white p-7 ${
+                featured
+                  ? "order-first border-2 border-pink shadow-[0_30px_60px_-30px_rgb(255_46_139/0.55)] lg:order-none"
+                  : "border border-black/[0.07] shadow-card"
               }`}
             >
-              Choisir {p.name}
-            </a>
-            <ul className={`mt-7 flex-1 space-y-3 border-t pt-7 ${p.featured ? "border-white/10" : "border-black/[0.07]"}`}>
-              {p.features.map((f) => (
-                <li key={f} className={`flex items-start gap-3 text-[15px] ${p.featured ? "text-white/85" : "text-body"}`}>
-                  <Check className={`mt-0.5 h-4 w-4 shrink-0 ${p.featured ? "text-pink" : "text-ink"}`} /> {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+              {featured && (
+                <span className="absolute -top-3.5 right-6 rounded-full bg-pink px-3.5 py-1.5 text-xs font-bold tracking-tight text-white">
+                  Le plus populaire
+                </span>
+              )}
+              <PlanIcon id={plan.id} />
+              <h3 className="display mt-5 text-2xl">{plan.name}</h3>
+              <p className="display mt-2 text-[2.1rem] leading-none text-pink">
+                {plan.price}&nbsp;€<span className="text-2xl">/mois</span>
+              </p>
+              <p className="mt-5 text-[15px] text-body">
+                <strong className="font-semibold text-ink">{plan.shortsPerMonth} shorts par mois</strong>
+                <span className="text-muted"> · soit {perShort(plan)}&nbsp;€ le short</span>
+              </p>
+              <ul className="mb-8 mt-5 flex-1 space-y-3.5">
+                {features(plan, PLANS[i - 1]).map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-[15px] text-body">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-pink" /> {feature}
+                  </li>
+                ))}
+              </ul>
+              <PlanButton plan={plan} featured={featured} />
+            </div>
+          );
+        })}
       </div>
+      <p className="mt-6 text-center text-[13px] text-muted">
+        Paiement sécurisé par Mollie. Les shorts non utilisés ne sont pas reportés au mois suivant.
+      </p>
     </section>
   );
 }

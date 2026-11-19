@@ -19,7 +19,7 @@ export function Steps() {
   return (
     <section id="fonctionnement" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
       <SectionHeading title="Tu choisis la vidéo, ViceClip fait les shorts">
-        Pas de logiciel de montage, pas de timeline à apprendre. Trois shorts prêts à poster pour chaque vidéo.
+        Pas de logiciel de montage, pas de timeline à apprendre. Jusqu&apos;à 8 shorts prêts à poster par vidéo, selon ton offre.
       </SectionHeading>
 
       <ol className="mt-9 grid gap-x-10 md:mt-12 md:grid-cols-3">

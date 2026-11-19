@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { billingReady } from "./billing";
 import { config } from "./config";
 import { capture } from "./exec";
 
@@ -68,7 +69,13 @@ export async function refuseIfUnavailable(source: "youtube" | "upload"): Promise
 }
 
 /** État du serveur pour la route de diagnostic `/api/health`. */
-export async function serverHealth(): Promise<{ ok: boolean; youtube: boolean; facecam: boolean; problems: string[] }> {
+export async function serverHealth(): Promise<{
+  ok: boolean;
+  youtube: boolean;
+  facecam: boolean;
+  billing: boolean;
+  problems: string[];
+}> {
   const problems = await inspect();
   return {
     ok: !problems.hosting && !problems.ffmpeg,
@@ -78,15 +85,8 @@ export async function serverHealth(): Promise<{ ok: boolean; youtube: boolean; f
       () => true,
       () => false,
     ),
+    // Les abonnements demandent une clé Mollie et une adresse publique pour les notifications.
+    billing: billingReady(),
     problems: Object.values(problems),
   };
-}
-
-/** Réponse renvoyée quand une route échoue de façon imprévue : toujours du JSON, jamais un corps vide. */
-export function unexpectedError(err: unknown): Response {
-  console.error("[viceclip] erreur inattendue", err);
-  return Response.json(
-    { error: "Le serveur a rencontré une erreur en lançant le découpage. Réessaie dans un instant." },
-    { status: 500 },
-  );
 }

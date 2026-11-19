@@ -46,6 +46,14 @@ export interface Job {
   };
   /** Mise en page des shorts : plein écran, ou facecam du streamer en haut et jeu en dessous. */
   layout?: "full" | "facecam";
+  /** Compte qui a lancé le découpage. */
+  userId?: string;
+  /** Shorts réservés sur le quota du compte pour cette vidéo ; ceux qui ne sont pas produits sont rendus. */
+  reserved?: number;
+  /** Vrai une fois le quota régularisé (shorts non produits rendus au compte). */
+  settled?: boolean;
+  /** Durée maximale de la vidéo source autorisée par l'offre, en minutes. */
+  maxMinutes?: number;
   /** Nombre de shorts déjà rendus pendant l'étape « render ». */
   rendered: number;
   clips: Clip[];

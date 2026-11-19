@@ -7,7 +7,11 @@ import { config } from "./config";
 const ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /** File d'attente en mémoire, partagée par tout le processus (un traitement à la fois). */
-type QueueState = { waiting: string[]; running: string | null; worker: ((id: string) => Promise<void>) | null };
+type QueueState = {
+  waiting: { id: string; priority: number }[];
+  running: string | null;
+  worker: ((id: string) => Promise<void>) | null;
+};
 const globalForQueue = globalThis as unknown as { __viceclipQueue?: QueueState };
 const queue: QueueState = (globalForQueue.__viceclipQueue ??= { waiting: [], running: null, worker: null });
 
@@ -31,8 +35,13 @@ async function writeJob(job: Job): Promise<void> {
   await fs.rename(tmp, file);
 }
 
-export async function createJob(source: Job["source"], id: string = randomUUID()): Promise<Job> {
+export async function createJob(
+  source: Job["source"],
+  extra: Pick<Job, "userId" | "reserved" | "maxMinutes"> = {},
+  id: string = randomUUID(),
+): Promise<Job> {
   const job: Job = {
+    ...extra,
     id,
     createdAt: Date.now(),
     status: "queued",
@@ -57,10 +66,11 @@ export async function readJob(id: string): Promise<Job | null> {
   }
   // Un traitement marqué actif mais inconnu de la file a été interrompu par un redémarrage.
   const active = job.status === "queued" || job.status === "running";
-  if (active && queue.running !== id && !queue.waiting.includes(id)) {
+  if (active && queue.running !== id && !isWaiting(id)) {
     job.status = "error";
     job.error = "Le traitement a été interrompu par un redémarrage du serveur. Relance le découpage.";
     await writeJob(job);
+    await settleJob(job);
   }
   return job;
 }
@@ -72,6 +82,23 @@ export async function updateJob(id: string, patch: Partial<Job>): Promise<Job> {
   return job;
 }
 
+/**
+ * Régularise le quota du compte à la fin d'un découpage : les shorts réservés qui n'ont pas été
+ * produits lui sont rendus. Ne s'applique qu'une fois par traitement.
+ */
+export async function settleJob(job: Job): Promise<void> {
+  if (job.settled || !job.userId) return;
+  await updateJob(job.id, { settled: true });
+  // Un découpage en échec ne livre rien : toute la réservation est rendue.
+  const unused = (job.reserved ?? 0) - (job.status === "done" ? job.clips.length : 0);
+  if (unused > 0) {
+    const { refundShorts } = await import("./auth");
+    refundShorts(job.userId, unused);
+  }
+}
+
+const isWaiting = (id: string) => queue.waiting.some((entry) => entry.id === id);
+
 export function queuedCount(): number {
   return queue.waiting.length + (queue.running ? 1 : 0);
 }
@@ -79,19 +106,21 @@ export function queuedCount(): number {
 /** Position dans la file : 0 si le traitement est en cours, sinon le nombre de traitements avant lui. */
 export function queuePosition(id: string): number {
   if (queue.running === id) return 0;
-  const i = queue.waiting.indexOf(id);
+  const i = queue.waiting.findIndex((entry) => entry.id === id);
   return i < 0 ? 0 : i + (queue.running ? 1 : 0);
 }
 
-export function enqueue(id: string, worker: (id: string) => Promise<void>): void {
+/** Ajoute un traitement à la file. À priorité égale, le premier arrivé passe en premier. */
+export function enqueue(id: string, worker: (id: string) => Promise<void>, priority = 0): void {
   queue.worker = worker;
-  queue.waiting.push(id);
+  const after = queue.waiting.findLastIndex((entry) => entry.priority >= priority);
+  queue.waiting.splice(after + 1, 0, { id, priority });
   void pump();
 }
 
 async function pump(): Promise<void> {
   if (queue.running || !queue.worker) return;
-  const id = queue.waiting.shift();
+  const id = queue.waiting.shift()?.id;
   if (!id) return;
   queue.running = id;
   try {
@@ -115,7 +144,7 @@ export async function removeExpiredJobs(): Promise<void> {
     return;
   }
   for (const name of names) {
-    if (!isJobId(name) || queue.running === name || queue.waiting.includes(name)) continue;
+    if (!isJobId(name) || queue.running === name || isWaiting(name)) continue;
     const dir = path.join(root, name);
     const stat = await fs.stat(dir).catch(() => null);
     if (stat && stat.mtimeMs < limit) await fs.rm(dir, { recursive: true, force: true });

@@ -2,33 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiUrl } from "@/lib/api";
+import { isSignedIn, rememberUrl, startJob } from "@/lib/account";
 import { parseYouTubeId } from "@/lib/youtube";
 import { ArrowRight, LinkIcon } from "./Icons";
-
-type Reply = { id?: string; error?: string };
-
-/** Lit la réponse du serveur sans jamais planter : une réponse vide ou non JSON devient un message clair. */
-function parseReply(text: string, status: number): Reply {
-  try {
-    const data: unknown = JSON.parse(text);
-    if (data && typeof data === "object") return data as Reply;
-  } catch {
-    // Réponse vide ou page d'erreur de l'hébergeur : traité ci-dessous.
-  }
-  return {
-    error:
-      status === 404 || status === 405
-        ? "Le service de découpage n'est pas disponible sur ce site."
-        : `Le serveur de découpage ne répond pas correctement (erreur ${status}). Réessaie dans un instant.`,
-  };
-}
 
 export function UrlForm() {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [needsPlan, setNeedsPlan] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,27 +21,21 @@ export function UrlForm() {
       return;
     }
     setError(null);
-    setBusy(true);
-    try {
-      const res = await fetch(apiUrl("/api/jobs"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      const data = parseReply(await res.text(), res.status);
-      if (!res.ok || !data.id) throw new Error(data.error ?? "Le découpage n'a pas pu être lancé.");
-      router.push(`/projets/${data.id}`);
-    } catch (err) {
-      // `fetch` échoue avec une TypeError quand le serveur est injoignable.
-      setError(
-        err instanceof TypeError
-          ? "Impossible de joindre le serveur. Vérifie ta connexion et réessaie."
-          : err instanceof Error
-            ? err.message
-            : "Le découpage n'a pas pu être lancé.",
-      );
-      setBusy(false);
+    // Le découpage est rattaché à un compte : un visiteur crée d'abord le sien, puis reprend ici.
+    if (!isSignedIn()) {
+      rememberUrl(url);
+      router.push("/inscription");
+      return;
     }
+    setBusy(true);
+    const job = await startJob(url);
+    if (job.id) {
+      router.push(`/projets/${job.id}`);
+      return;
+    }
+    setError(job.error ?? "Le découpage n'a pas pu être lancé.");
+    setNeedsPlan(job.status === 402);
+    setBusy(false);
   }
 
   return (
@@ -112,10 +89,19 @@ export function UrlForm() {
       </form>
 
       <div id="yt-url-msg" aria-live="polite">
-        {error && <p className="mt-3 text-sm font-medium text-[#c2410c]">{error}</p>}
+        {error && (
+          <p className="mt-3 text-sm font-medium text-[#c2410c]">
+            {error}{" "}
+            {needsPlan && (
+              <a href="#tarifs" className="font-semibold text-ink underline decoration-pink underline-offset-4">
+                Voir les offres
+              </a>
+            )}
+          </p>
+        )}
       </div>
 
-      <p className="mt-3 text-[13px] text-muted sm:mt-4 sm:text-sm">3 shorts par vidéo · Sans inscription</p>
+      <p className="mt-3 text-[13px] text-muted sm:mt-4 sm:text-sm">3 shorts offerts à l&apos;inscription · Sans carte bancaire</p>
     </div>
   );
 }

@@ -26,7 +26,26 @@ Le site est servi sur http://localhost:3000.
 5. **Rendu** : chaque passage sort en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres. Avec une facecam, elle occupe le tiers haut et le jeu les deux tiers du bas ; sinon le jeu, recadré au centre, remplit l'écran.
 6. La page `/projets/<id>` suit l'avancement puis affiche les shorts, à lire et à télécharger. Ils sont supprimés au bout de 24 heures.
 
-Il n'y a ni compte ni paiement pour l'instant : les offres affichées sur la page d'accueil ne sont pas appliquées, chaque vidéo donne trois shorts.
+## Comptes et abonnements
+
+Un découpage demande un compte (adresse e-mail et mot de passe). Chaque compte reçoit 3 shorts d'essai, puis l'utilisateur choisit une offre mensuelle, définie dans `lib/plans.ts` :
+
+| Offre | Prix | Shorts par mois | Shorts par vidéo | Durée max. d'une vidéo |
+| --- | --- | --- | --- | --- |
+| Clipper | 19 € | 30 | 3 | 30 min |
+| Expert | 29 € | 90 | 5 | 1 h |
+| Pro | 49 € | 200 | 8 | 1 h 30 |
+
+Le paiement passe par Mollie (`lib/server/billing.ts`, SDK `mollie-api-typescript`) :
+
+1. Le premier paiement règle le premier mois et enregistre le moyen de paiement.
+2. À sa confirmation, l'offre est activée et un abonnement Mollie est créé ; il prélève chaque mois à partir du mois suivant.
+3. Mollie notifie chaque paiement sur `POST /api/billing/webhook`. L'état est toujours relu auprès de Mollie, et une notification rejouée ne crédite pas deux fois.
+4. À chaque prélèvement réussi, le compteur de shorts repart au quota de l'offre (pas de report). Une offre résiliée, ou dont les prélèvements échouent, s'arrête à la fin de la période payée.
+
+Les shorts d'une vidéo sont réservés sur le quota au lancement ; ceux qui ne sont pas produits (vidéo trop courte, échec) sont rendus au compte. Les comptes sont stockés dans une base SQLite (`lib/server/db.ts`), à placer sur un disque persistant.
+
+Ce qui manque encore : réinitialisation du mot de passe (aucun envoi d'e-mail n'est en place), factures, conditions générales de vente.
 
 ## Structure
 
@@ -36,6 +55,8 @@ Il n'y a ni compte ni paiement pour l'instant : les offres affichées sur la pag
 - `lib/server/pipeline.ts` : enchaînement des étapes.
 - `lib/server/youtube.ts` : appels à yt-dlp. `lib/server/analyze.ts` : détection des passages. `lib/server/subtitles.ts` : sous-titres. `lib/server/render.ts` : rendu ffmpeg.
 - `lib/server/jobs.ts` : stockage des traitements sur disque et file d'attente en mémoire.
+- `lib/plans.ts` : offres. `lib/server/auth.ts` : comptes, sessions et quotas. `lib/server/billing.ts` : abonnements Mollie.
+- `app/inscription`, `app/connexion`, `app/compte` : pages du compte ; `lib/account.ts` garde la session côté navigateur.
 - `lib/images.ts` et `public/images/` : visuels officiels de GTA VI (ils appartiennent à Rockstar Games).
 
 ## Réglages
@@ -44,11 +65,13 @@ Variables d'environnement, toutes facultatives :
 
 | Variable | Rôle | Valeur par défaut |
 | --- | --- | --- |
-| `VICECLIP_DATA_DIR` | Dossier des vidéos en cours et des shorts | `./data` |
-| `VICECLIP_MAX_MINUTES` | Durée maximale d'une vidéo source | `90` |
+| `VICECLIP_DATA_DIR` | Dossier des vidéos en cours et des shorts (temporaire) | `./data` |
+| `VICECLIP_DB_DIR` | Dossier de la base des comptes (persistant) | celui de `VICECLIP_DATA_DIR` |
+| `MOLLIE_API_KEY` | Clé d'API Mollie (`test_…` pour les essais, `live_…` en production). Sans elle, les abonnements sont désactivés | aucune |
+| `VICECLIP_PUBLIC_URL` | Adresse publique du serveur, appelée par Mollie pour ses notifications | déduite de `RAILWAY_PUBLIC_DOMAIN` |
+| `VICECLIP_MAX_MINUTES` | Plafond du serveur pour la durée d'une vidéo source, quelle que soit l'offre | `90` |
 | `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir la route d'essai `POST /api/jobs/upload` (import direct d'un fichier, non proposé sur le site) | fermée |
 | `VICECLIP_MAX_UPLOAD_MB` | Taille maximale d'un fichier envoyé à la route d'essai | `2048` |
-| `VICECLIP_SHORTS_PER_JOB` | Nombre de shorts par vidéo | `3` |
 | `VICECLIP_CLIP_SECONDS` | Durée de chaque short | `64` |
 | `VICECLIP_JOB_TTL_HOURS` | Durée de conservation des shorts | `24` |
 | `NEXT_PUBLIC_VICECLIP_API` | Adresse du serveur de découpage, quand il est séparé du site | aucune (même serveur) |

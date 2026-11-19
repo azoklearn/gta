@@ -10,13 +10,19 @@ const patterns = (process.env.VICECLIP_ALLOWED_ORIGINS ?? "")
   .filter(Boolean)
   .map((entry) => new RegExp(`^${entry.split("*").map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join("[^/]*")}$`));
 
-function corsHeaders(request: Request): Record<string, string> {
+/** Adresse du site qui appelle, si elle fait partie des sites autorisés. */
+export function allowedOrigin(request: Request): string | null {
   const origin = request.headers.get("origin");
-  if (!origin || !patterns.some((pattern) => pattern.test(origin))) return {};
+  return origin && patterns.some((pattern) => pattern.test(origin)) ? origin : null;
+}
+
+function corsHeaders(request: Request): Record<string, string> {
+  const origin = allowedOrigin(request);
+  if (!origin) return {};
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Filename",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Filename",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ButtonLink } from "./Button";
+import Link from "next/link";
+import { useAccount } from "@/lib/account";
+import { AccountButton } from "./AccountButton";
 import { Logo } from "./Logo";
 
 const LINKS = [
@@ -13,6 +15,7 @@ const LINKS = [
 
 export function Nav() {
   const [open, setOpen] = useState(false);
+  const { status } = useAccount();
 
   useEffect(() => {
     if (!open) return;
@@ -43,15 +46,12 @@ export function Nav() {
             ))}
           </ul>
           <div className="flex items-center gap-2">
-            <ButtonLink
-              href="#top"
-              variant="pink"
-              size="sm"
-              className="max-[359px]:pr-4"
-              dotClassName="max-[359px]:hidden"
-            >
-              Essayer
-            </ButtonLink>
+            {status === "guest" && (
+              <Link href="/connexion" className="hidden px-2 text-[15px] font-semibold text-body transition hover:text-ink sm:block">
+                Connexion
+              </Link>
+            )}
+            <AccountButton guestHref="#top" />
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -72,7 +72,7 @@ export function Nav() {
 
         {open && (
           <ul id="menu-mobile" className="border-t border-black/5 px-2 pb-2 pt-1 md:hidden">
-            {LINKS.map(([label, href]) => (
+            {[...LINKS, status === "ready" ? ["Mon compte", "/compte"] : ["Connexion", "/connexion"]].map(([label, href]) => (
               <li key={href}>
                 <a
                   href={href}

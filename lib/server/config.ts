@@ -9,7 +9,18 @@ function num(value: string | undefined, fallback: number): number {
 export const config = {
   /** Dossier où sont stockés les traitements (vidéos sources temporaires et shorts). */
   dataDir: process.env.VICECLIP_DATA_DIR || path.join(process.cwd(), "data"),
+  /** Dossier de la base de données des comptes. À placer sur un disque persistant. */
+  dbDir: process.env.VICECLIP_DB_DIR || process.env.VICECLIP_DATA_DIR || path.join(process.cwd(), "data"),
   fontsDir: path.join(process.cwd(), "assets", "fonts"),
+  /** Clé d'API Mollie (`test_…` ou `live_…`). Sans elle, les abonnements sont désactivés. */
+  mollieApiKey: process.env.MOLLIE_API_KEY || "",
+  /** Adresse de l'API Mollie, à changer uniquement pour des essais. */
+  mollieApiUrl: process.env.MOLLIE_API_URL || "",
+  /** Adresse publique de ce serveur, que Mollie appelle pour notifier les paiements. */
+  publicUrl: (
+    process.env.VICECLIP_PUBLIC_URL ||
+    (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "")
+  ).replace(/\/+$/, ""),
   /** Durée maximale d'une vidéo source, en minutes. */
   maxSourceMinutes: num(process.env.VICECLIP_MAX_MINUTES, 90),
   /**

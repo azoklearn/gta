@@ -18,7 +18,7 @@ export function FinalCta() {
           Pendant qu&apos;ils jouent, tes shorts se préparent.
         </h2>
         <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
-          Colle la vidéo d&apos;un streamer GTA&nbsp;6 et récupère 3 shorts prêts à poster, sans inscription.
+          Colle la vidéo d&apos;un streamer GTA&nbsp;6 et récupère tes 3 premiers shorts, offerts à l&apos;inscription.
         </p>
         <ButtonLink href="#top" variant="light" className="mt-8 max-sm:w-full max-sm:justify-between">
           Créer mes premiers shorts
