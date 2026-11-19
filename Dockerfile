@@ -19,4 +19,4 @@ ENV VICECLIP_DATA_DIR=/work
 # à chaque déploiement (l'instruction VOLUME n'est pas utilisée : certains hébergeurs la refusent).
 ENV VICECLIP_DB_DIR=/data
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["./start.sh"]
