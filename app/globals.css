@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-anton), Impact, "Arial Narrow", sans-serif;
+
+  --color-night: #0a0612;
+  --color-panel: #140c22;
+  --color-panel-2: #1b1130;
+  --color-line: #2c1f44;
+  --color-pink: #ff3ea5;
+  --color-orange: #ff8a3c;
+  --color-sun: #ffd166;
+  --color-violet: #8b5cf6;
+  --color-cash: #4ade9b;
+  --color-mist: #b6aacb;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -10px;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  background: var(--color-night);
+}
+
+body {
+  background: var(--color-night);
+  color: #f6f1ff;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-pink);
+  color: #fff;
+}
+
+/* Dégradé « coucher de soleil sur Vice City » */
+@utility text-sunset {
+  background-image: linear-gradient(
+    95deg,
+    var(--color-sun) 0%,
+    var(--color-orange) 30%,
+    var(--color-pink) 65%,
+    var(--color-violet) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-sunset {
+  background-image: linear-gradient(
+    95deg,
+    var(--color-orange) 0%,
+    var(--color-pink) 55%,
+    var(--color-violet) 100%
+  );
+}
+
+@utility text-cash {
+  background-image: linear-gradient(95deg, #b6ffd9 0%, var(--color-cash) 60%, #22c1a0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Curseurs du simulateur de revenus */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--color-orange) 0%,
+    var(--color-pink) var(--fill, 50%),
+    var(--color-line) var(--fill, 50%)
+  );
+  outline-offset: 6px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-pink);
+  box-shadow: 0 0 0 4px rgb(255 62 165 / 0.2);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-pink);
+  box-shadow: 0 0 0 4px rgb(255 62 165 / 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
