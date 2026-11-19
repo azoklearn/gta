@@ -5,6 +5,7 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { config } from "@/lib/server/config";
+import { preflight, withCors } from "@/lib/server/cors";
 import { createJob, enqueue, jobDir, removeExpiredJobs } from "@/lib/server/jobs";
 import { refuseIfBusy } from "@/lib/server/limits";
 import { runJob } from "@/lib/server/pipeline";
@@ -15,10 +16,14 @@ const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
 /** Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage. */
 export async function POST(request: Request) {
   try {
-    return await receive(request);
+    return withCors(request, await receive(request));
   } catch (err) {
-    return unexpectedError(err);
+    return withCors(request, unexpectedError(err));
   }
+}
+
+export function OPTIONS(request: Request) {
+  return preflight(request);
 }
 
 async function receive(request: Request): Promise<Response> {

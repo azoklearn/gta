@@ -30,7 +30,7 @@ Il n'y a ni compte ni paiement pour l'instant : les offres affichées sur la pag
 
 - `app/page.tsx` : page d'accueil, une section par fichier dans `components/`.
 - `app/projets/[id]/page.tsx` et `components/ProjectView.tsx` : suivi d'un découpage et résultats.
-- `app/api/jobs/` : création d'un traitement, état, lecture et téléchargement des shorts.
+- `app/api/jobs/` : création d'un traitement, état, lecture et téléchargement des shorts. `app/api/health` : diagnostic du serveur.
 - `lib/server/pipeline.ts` : enchaînement des étapes.
 - `lib/server/youtube.ts` : appels à yt-dlp. `lib/server/analyze.ts` : détection des passages. `lib/server/subtitles.ts` : sous-titres. `lib/server/render.ts` : rendu ffmpeg.
 - `lib/server/jobs.ts` : stockage des traitements sur disque et file d'attente en mémoire.
@@ -48,17 +48,36 @@ Variables d'environnement, toutes facultatives :
 | `VICECLIP_SHORTS_PER_JOB` | Nombre de shorts par vidéo | `3` |
 | `VICECLIP_CLIP_SECONDS` | Durée de chaque short | `64` |
 | `VICECLIP_JOB_TTL_HOURS` | Durée de conservation des shorts | `24` |
+| `NEXT_PUBLIC_VICECLIP_API` | Adresse du serveur de découpage, quand il est séparé du site | aucune (même serveur) |
+| `VICECLIP_ALLOWED_ORIGINS` | Sites autorisés à appeler le serveur de découpage | aucun |
 | `YTDLP_COOKIES` | Fichier de cookies transmis à yt-dlp | aucun |
 | `YTDLP_PROXY` | Proxy transmis à yt-dlp | aucun |
 | `FFMPEG_PATH`, `FFPROBE_PATH`, `YTDLP_PATH` | Chemins des outils | ceux du `PATH` |
 
 ## Mise en ligne
 
-Le découpage tourne dans le processus Node et écrit sur le disque local : il faut un serveur qui reste allumé (VPS, Railway, Fly.io, Render…), pas un hébergement sans serveur comme Vercel. Le `Dockerfile` installe ffmpeg et yt-dlp ; il n'a pas encore été construit ni testé.
+Le découpage tourne en tâche de fond, utilise ffmpeg et yt-dlp et écrit sur le disque : il lui faut un serveur qui reste allumé. Vercel et les autres hébergements « serverless » ne peuvent pas le faire tourner. Deux montages sont possibles.
+
+### Site sur Vercel, découpage sur un serveur à part
+
+Le même dépôt est déployé deux fois : Vercel sert les pages, un second serveur exécute le découpage. Le navigateur envoie les vidéos et lit les shorts directement sur ce second serveur.
+
+1. **Serveur de découpage.** Déploie ce dépôt avec son `Dockerfile` sur un hébergeur de conteneurs (Railway, Render, Fly.io) ou un VPS. L'application écoute sur le port 3000, ou sur celui de la variable `PORT`. Il lui faut une adresse publique en HTTPS.
+2. Sur ce serveur, règle `VICECLIP_ALLOWED_ORIGINS` avec l'adresse du site, par exemple `https://ton-site.vercel.app`. Plusieurs adresses se séparent par des virgules, et `https://*.vercel.app` couvre les déploiements de prévisualisation.
+3. Ouvre `https://<serveur>/api/health` : la réponse doit contenir `"ok": true`. Sinon elle dit ce qui manque.
+4. **Site.** Sur Vercel, ajoute la variable d'environnement `NEXT_PUBLIC_VICECLIP_API` avec l'adresse du serveur de découpage (`https://<serveur>`, sans chemin), puis redéploie : cette variable est lue au moment de la construction du site.
+
+Le `Dockerfile` n'a pas encore été construit ni testé ; le montage en deux parties a été vérifié en local avec deux instances du site.
+
+### Tout sur un seul serveur
+
+Déploie le `Dockerfile` et pointe ton domaine dessus, sans régler `NEXT_PUBLIC_VICECLIP_API` ni `VICECLIP_ALLOWED_ORIGINS`.
+
+### À savoir
 
 Avant chaque découpage, le serveur vérifie qu'il peut écrire dans son dossier de travail et que ffmpeg et yt-dlp sont installés ; sinon le formulaire affiche la raison au lieu de lancer un traitement voué à l'échec.
 
-YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Dans ce cas, renseigne `YTDLP_COOKIES` ou `YTDLP_PROXY` ; l'import de fichier fonctionne dans tous les cas.
+YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Le serveur relance automatiquement ; si le refus persiste, renseigne `YTDLP_COOKIES` ou `YTDLP_PROXY`. L'import de fichier fonctionne dans tous les cas.
 
 ## Limites connues
 

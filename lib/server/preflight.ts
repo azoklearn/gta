@@ -22,7 +22,7 @@ async function inspect(): Promise<Check["problems"]> {
   const serverless = ["VERCEL", "AWS_LAMBDA_FUNCTION_NAME", "NETLIFY", "CF_PAGES"].find((name) => process.env[name]);
   if (serverless) {
     problems.hosting =
-      "Le découpage n'est pas disponible sur cet hébergement. Il lui faut un serveur qui reste allumé, avec ffmpeg et yt-dlp : les hébergements « serverless » comme Vercel ne conviennent pas.";
+      "Le découpage n'est pas encore branché sur ce site : il lui faut un serveur de découpage séparé, dont l'adresse se règle avec NEXT_PUBLIC_VICECLIP_API (voir le README).";
     return problems;
   }
 
@@ -65,6 +65,16 @@ export async function refuseIfUnavailable(source: "youtube" | "upload"): Promise
   if (!problem) return null;
   console.error(`[viceclip] découpage refusé : ${problem}`);
   return Response.json({ error: problem }, { status: 503 });
+}
+
+/** État du serveur pour la route de diagnostic `/api/health`. */
+export async function serverHealth(): Promise<{ ok: boolean; youtube: boolean; problems: string[] }> {
+  const problems = await inspect();
+  return {
+    ok: !problems.hosting && !problems.ffmpeg,
+    youtube: !problems.hosting && !problems.ffmpeg && !problems.ytdlp,
+    problems: Object.values(problems),
+  };
 }
 
 /** Réponse renvoyée quand une route échoue de façon imprévue : toujours du JSON, jamais un corps vide. */

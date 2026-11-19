@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/api";
 import type { Clip, Job, JobStep } from "@/lib/types";
 import { ButtonLink } from "./Button";
 import { Check, Download, WantedStars } from "./Icons";
@@ -31,7 +32,7 @@ function useJob(id: string): Load {
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
       try {
-        const res = await fetch(`/api/jobs/${id}`, { cache: "no-store" });
+        const res = await fetch(apiUrl(`/api/jobs/${id}`), { cache: "no-store" });
         if (stopped) return;
         if (res.status === 404) return setLoad({ kind: "missing" });
         const job = (await res.json()) as JobState;
@@ -144,7 +145,7 @@ function Progress({ job }: { job: JobState }) {
 
 function ShortCard({ jobId, clip }: { jobId: string; clip: Clip }) {
   const [copied, setCopied] = useState(false);
-  const base = `/api/jobs/${jobId}/shorts/${clip.index}`;
+  const base = apiUrl(`/api/jobs/${jobId}/shorts/${clip.index}`);
   const text = `${clip.caption} ${clip.hashtags.join(" ")}`;
 
   async function copy() {

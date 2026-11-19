@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { apiUrl } from "@/lib/api";
 import { parseYouTubeId } from "@/lib/youtube";
 import { ArrowRight, LinkIcon } from "./Icons";
 
@@ -29,7 +30,7 @@ function parseReply(text: string, status: number): Reply {
 function uploadFile(file: File, onProgress: (p: number) => void): Promise<Reply> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/jobs/upload");
+    xhr.open("POST", apiUrl("/api/jobs/upload"));
     xhr.setRequestHeader("x-filename", encodeURIComponent(file.name));
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
@@ -56,7 +57,7 @@ export function UrlForm() {
     setError(null);
     setBusy({ kind: "link" });
     try {
-      const res = await fetch("/api/jobs", {
+      const res = await fetch(apiUrl("/api/jobs"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
