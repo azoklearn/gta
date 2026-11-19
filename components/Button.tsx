@@ -13,12 +13,15 @@ export function ButtonLink({
   variant = "dark",
   size = "md",
   className = "",
+  dotClassName = "",
 }: {
   href: string;
   children: React.ReactNode;
   variant?: keyof typeof VARIANTS;
   size?: "sm" | "md";
   className?: string;
+  /** Classes ajoutées à la pastille fléchée (par exemple pour la masquer sur très petit écran). */
+  dotClassName?: string;
 }) {
   const [shell, dot] = VARIANTS[variant];
   const sizing = size === "sm" ? "h-11 pl-4 pr-1.5 text-sm gap-2.5" : "h-[3.25rem] pl-6 pr-2 text-base gap-4";
@@ -29,7 +32,7 @@ export function ButtonLink({
       className={`group inline-flex items-center rounded-[14px] font-semibold tracking-tight transition active:scale-[0.98] ${sizing} ${shell} ${className}`}
     >
       {children}
-      <span className={`grid place-items-center rounded-full transition group-hover:translate-x-0.5 ${dotSize} ${dot}`}>
+      <span className={`grid place-items-center rounded-full transition group-hover:translate-x-0.5 ${dotSize} ${dot} ${dotClassName}`}>
         <ArrowRight className="h-4 w-4" />
       </span>
     </a>

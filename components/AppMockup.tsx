@@ -24,7 +24,7 @@ const BARS = Array.from({ length: 72 }, (_, i) => {
 /** Maquette de l'interface : la vidéo source à gauche, les shorts générés à droite. */
 export function AppMockup() {
   return (
-    <div className="rounded-[28px] border border-black/5 bg-white p-2 text-left shadow-float sm:rounded-[32px] sm:p-2.5">
+    <div className="rounded-[26px] border border-black/5 bg-white p-1.5 text-left shadow-float sm:rounded-[32px] sm:p-2.5">
       <div className="overflow-hidden rounded-[20px] border border-black/5 bg-paper sm:rounded-[24px]">
         {/* Barre de titre */}
         <div className="flex items-center gap-4 border-b border-black/5 bg-white px-4 py-3">
@@ -42,9 +42,9 @@ export function AppMockup() {
           </span>
         </div>
 
-        <div className="grid gap-2.5 p-2.5 sm:gap-3 sm:p-3 lg:grid-cols-[1.55fr_1fr]">
+        <div className="grid gap-2 p-2 sm:gap-3 sm:p-3 lg:grid-cols-[1.55fr_1fr]">
           {/* Vidéo source + timeline */}
-          <div className="min-w-0 rounded-2xl border border-black/5 bg-white p-2.5 sm:p-3">
+          <div className="min-w-0 rounded-2xl border border-black/5 bg-white p-2 sm:p-3">
             <div className="relative overflow-hidden rounded-xl">
               <Image
                 src={gameImages.source}
@@ -82,9 +82,39 @@ export function AppMockup() {
           </div>
 
           {/* Shorts générés */}
-          <div className="flex min-w-0 flex-col rounded-2xl border border-black/5 bg-white p-2.5 sm:p-3">
-            <p className="px-1 pb-2 pt-0.5 text-[13px] font-semibold text-ink">Shorts générés</p>
-            <ul className="flex flex-1 flex-col gap-2">
+          <div className="flex min-w-0 flex-col rounded-2xl border border-black/5 bg-white p-2 sm:p-3">
+            <p className="flex items-center justify-between px-1 pb-2 pt-0.5 text-[13px] font-semibold text-ink">
+              Shorts générés
+              <span className="font-normal text-muted sm:hidden">Fais défiler →</span>
+            </p>
+
+            {/* Téléphone et tablette : cartes portrait, en carrousel sur petit écran */}
+            <ul className="no-scrollbar -mx-2 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-2 px-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:px-0 lg:hidden">
+              {SHORTS.map((s, i) => (
+                <li key={s.title} className="relative w-[43%] shrink-0 snap-start overflow-hidden rounded-xl sm:w-auto">
+                  <Image
+                    src={gameImages.clips[i]}
+                    alt=""
+                    width={720}
+                    height={1067}
+                    sizes="(min-width: 640px) 30vw, 45vw"
+                    className="aspect-[9/16] w-full object-cover"
+                    style={{ objectPosition: s.position }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 via-45% to-black/25" />
+                  <span className="absolute right-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-white backdrop-blur">
+                    {s.length}
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 p-2.5">
+                    <p className="text-[13px] font-semibold leading-tight text-white sm:text-[15px]">{s.title}</p>
+                    <WantedStars level={s.stars} offColor="text-white/30" className="mt-1.5 h-3" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Ordinateur : liste détaillée */}
+            <ul className="hidden flex-1 flex-col gap-2 lg:flex">
               {SHORTS.map((s, i) => (
                 <li
                   key={s.title}

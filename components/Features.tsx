@@ -16,11 +16,11 @@ function Card({
 }) {
   return (
     <li className={`flex flex-col overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-card ${className}`}>
-      <div className="p-7 pb-0 sm:p-8 sm:pb-0">
+      <div className="p-6 pb-0 sm:p-8 sm:pb-0">
         <h3 className="display text-[1.45rem] leading-tight">{title}</h3>
         <p className="mt-2 max-w-md leading-relaxed text-body">{text}</p>
       </div>
-      <div className="mt-7 flex flex-1 flex-col justify-end px-7 pb-7 sm:px-8 sm:pb-8">{children}</div>
+      <div className="mt-6 flex flex-1 flex-col justify-end px-6 pb-6 sm:mt-7 sm:px-8 sm:pb-8">{children}</div>
     </li>
   );
 }
@@ -34,12 +34,12 @@ const SCORE = [
 
 export function Features() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+    <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
       <SectionHeading title="Tout le montage, déjà fait">
         Ce qui prend une soirée dans un logiciel de montage est prêt quand ta vidéo a fini de charger.
       </SectionHeading>
 
-      <ul className="mt-12 grid gap-4 sm:gap-5 lg:grid-cols-3">
+      <ul className="mt-9 grid gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">
         {/* Recadrage */}
         <Card
           className="lg:col-span-2"
@@ -97,9 +97,13 @@ export function Features() {
             </p>
           </div>
         </Card>
+      </ul>
 
+      {/* Trois cartes : carrousel à faire défiler sur téléphone et tablette, grille sur ordinateur */}
+      <ul className="no-scrollbar -mx-4 -mb-6 -mt-2 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 py-6 sm:-mx-6 sm:scroll-px-6 sm:gap-5 sm:px-6 lg:mx-0 lg:-mt-1 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
         {/* Sous-titres */}
         <Card
+          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
           title="Des sous-titres animés"
           text="Transcription automatique, mots-clés mis en couleur, styles pensés pour le gaming."
         >
@@ -123,6 +127,7 @@ export function Features() {
 
         {/* Titres et hashtags */}
         <Card
+          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
           title="Titres et hashtags"
           text="Une accroche et des hashtags GTA 6 proposés pour chaque short, prêts à copier."
         >
@@ -141,6 +146,7 @@ export function Features() {
 
         {/* Durée */}
         <Card
+          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
           title="Calé au-dessus d'une minute"
           text="TikTok ne rémunère que les vidéos de plus d'une minute. Chaque découpe franchit le seuil."
         >

@@ -33,17 +33,19 @@ const PLANS = [
 
 export function Pricing() {
   return (
-    <section id="tarifs" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+    <section id="tarifs" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
       <SectionHeading title="Rentabilisé dès le premier short viral">
         Sans engagement. Commence avec 3 shorts offerts, change d&apos;offre quand ton compte décolle.
       </SectionHeading>
 
-      <div className="mt-12 grid items-stretch gap-4 sm:gap-5 lg:grid-cols-3">
+      <div className="mt-9 grid items-stretch gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">
         {PLANS.map((p) => (
           <div
             key={p.name}
-            className={`flex flex-col rounded-[28px] p-8 ${
-              p.featured ? "bg-ink text-white shadow-float" : "border border-black/5 bg-white shadow-card"
+            className={`flex flex-col rounded-[28px] p-7 sm:p-8 ${
+              p.featured
+                ? "order-first bg-ink text-white shadow-float lg:order-none"
+                : "border border-black/5 bg-white shadow-card"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -53,8 +55,8 @@ export function Pricing() {
               )}
             </div>
             <p className={`mt-1 text-[15px] ${p.featured ? "text-white/60" : "text-body"}`}>{p.tagline}</p>
-            <p className="mt-7 flex items-baseline gap-1.5">
-              <span className="display text-6xl leading-none tabular-nums">{p.price} €</span>
+            <p className="mt-6 flex items-baseline gap-1.5 sm:mt-7">
+              <span className="display text-5xl leading-none tabular-nums sm:text-6xl">{p.price} €</span>
               <span className={p.featured ? "text-white/60" : "text-muted"}>/ mois</span>
             </p>
             <a
