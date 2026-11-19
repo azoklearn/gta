@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ProjectView } from "@/components/ProjectView";
 
 export const metadata: Metadata = {
-  title: "Ton projet — ViceClip",
+  title: "Ton projet — GTAClip",
   robots: { index: false },
 };
 

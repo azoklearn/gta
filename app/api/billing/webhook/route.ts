@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const form = await request.formData().catch(() => null);
   const id = form?.get("id");
   if (typeof id === "string" && /^tr_[A-Za-z0-9]{4,40}$/.test(id)) {
-    void handlePaymentNotification(id).catch((err) => console.error(`[viceclip:paiement] notification ${id} en échec`, err));
+    void handlePaymentNotification(id).catch((err) => console.error(`[gtaclip:paiement] notification ${id} en échec`, err));
   }
   return new Response(null, { status: 200 });
 }

@@ -55,7 +55,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/jobs/[id]/sh
     "Cache-Control": "private, max-age=3600",
   });
   if (url.searchParams.has("download")) {
-    headers.set("Content-Disposition", `attachment; filename="viceclip-short-${clip.index}.mp4"`);
+    headers.set("Content-Disposition", `attachment; filename="gtaclip-short-${clip.index}.mp4"`);
   }
 
   const range = request.headers.get("range")?.match(/^bytes=(\d*)-(\d*)$/);

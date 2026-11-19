@@ -35,16 +35,14 @@ export function PlanButton({ plan, featured }: { plan: Plan; featured: boolean }
         type="button"
         onClick={choose}
         disabled={busy || current}
-        className={`inline-flex h-[3.25rem] w-full items-center justify-center rounded-[14px] text-base font-semibold tracking-tight transition active:scale-[0.98] disabled:opacity-70 ${
-          featured
-            ? "bg-pink text-white shadow-[0_12px_26px_-12px_rgb(255_46_139/0.9)] hover:brightness-105"
-            : "bg-[#f1f0ee] text-ink hover:bg-[#e8e6e3]"
+        className={`inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full text-[15.5px] font-semibold tracking-[-0.005em] transition-[transform,background-color] duration-150 active:translate-y-px disabled:cursor-default disabled:opacity-70 ${
+          featured ? "button-shine bg-white text-black hover:bg-white/90" : "border border-white/12 bg-white/[0.05] text-ink hover:bg-white/[0.1]"
         }`}
       >
         {current ? "Ton offre actuelle" : busy ? "Ouverture du paiement…" : `Passer à ${plan.name}`}
       </button>
       {error && (
-        <p role="alert" className="mt-2 text-center text-sm font-medium text-[#c2410c]">
+        <p role="alert" className="mt-2 text-center text-sm font-medium text-[#ff9b7a]">
           {error}
         </p>
       )}

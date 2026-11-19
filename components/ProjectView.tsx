@@ -58,15 +58,15 @@ function Progress({ job }: { job: JobState }) {
   const overall = job.status === "queued" ? 0 : (current + job.progress) / steps.length;
 
   return (
-    <div className="rounded-[28px] border border-black/5 bg-white p-6 shadow-card sm:p-8">
+    <div className="panel p-6 sm:p-8">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="display text-2xl">
           {job.status === "queued" ? "En file d'attente" : "Découpage en cours"}
         </h2>
-        <span className="display text-2xl tabular-nums text-pink">{Math.round(overall * 100)} %</span>
+        <span className="display text-2xl tabular-nums text-gradient">{Math.round(overall * 100)} %</span>
       </div>
       <div
-        className="mt-4 h-2 rounded-full bg-black/[0.07]"
+        className="mt-4 h-2 rounded-full bg-white/10"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -80,7 +80,7 @@ function Progress({ job }: { job: JobState }) {
       </div>
 
       {job.status === "queued" && job.queuePosition > 0 && (
-        <p className="mt-4 text-[15px] text-body">
+        <p className="mt-4 text-[15px] text-ink-soft">
           {job.queuePosition === 1
             ? "Une vidéo passe avant la tienne."
             : `${job.queuePosition} vidéos passent avant la tienne.`}
@@ -95,7 +95,7 @@ function Progress({ job }: { job: JobState }) {
             <li key={step} className="flex items-center gap-3 text-[15px]">
               <span
                 className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${
-                  done ? "bg-cash text-white" : active ? "bg-pink-soft" : "bg-black/[0.06]"
+                  done ? "bg-cash text-black" : active ? "bg-pink/20" : "bg-white/10"
                 }`}
               >
                 {done ? (
@@ -107,7 +107,7 @@ function Progress({ job }: { job: JobState }) {
               <span className={active ? "font-semibold text-ink" : done ? "text-ink" : "text-muted"}>
                 {STEP_LABELS[step]}
                 {active && step === "render" && job.clips.length > 0 && (
-                  <span className="font-normal text-body">
+                  <span className="font-normal text-ink-soft">
                     {" "}
                     · {Math.min(job.rendered + 1, job.clips.length)} sur {job.clips.length}
                   </span>
@@ -140,16 +140,17 @@ function ShortCard({ jobId, clip }: { jobId: string; clip: Clip }) {
   }
 
   return (
-    <li className="flex w-full max-w-[20rem] flex-col overflow-hidden rounded-[28px] border border-black/5 bg-white p-3 shadow-card sm:w-[calc(50%-0.625rem)] sm:max-w-[22rem] lg:w-[calc(33.333%-0.84rem)]">
+    <li className="panel flex w-full max-w-[20rem] flex-col overflow-hidden p-3 sm:w-[calc(50%-0.625rem)] sm:max-w-[22rem] lg:w-[calc(33.333%-0.84rem)]">
       <video
         controls
         playsInline
         preload="none"
         poster={`${base}?thumb=1`}
         src={base}
-        className="aspect-[9/16] w-full rounded-[18px] bg-ink object-cover"
+        className="aspect-[9/16] w-full rounded-[16px] bg-black object-cover"
       />
       <div className="flex flex-1 flex-col p-3 pb-2">
+        {clip.title && <p className="mb-3 text-[15px] leading-snug font-semibold text-balance">{clip.title}</p>}
         <div className="flex items-center justify-between">
           <WantedStars level={clip.stars} className="h-[18px]" />
           <span className="display text-2xl tabular-nums">{clip.score.total}</span>
@@ -168,8 +169,8 @@ function ShortCard({ jobId, clip }: { jobId: string; clip: Clip }) {
             ] as const
           ).map(([label, value]) => (
             <div key={label} className="grid grid-cols-[4.5rem_1fr_1.75rem] items-center gap-2 text-[13px]">
-              <dt className="text-body">{label}</dt>
-              <dd className="h-1.5 rounded-full bg-black/[0.07]">
+              <dt className="text-ink-soft">{label}</dt>
+              <dd className="h-1.5 rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-pink" style={{ width: `${value}%` }} />
               </dd>
               <dd className="text-right font-medium tabular-nums text-ink">{value}</dd>
@@ -177,19 +178,19 @@ function ShortCard({ jobId, clip }: { jobId: string; clip: Clip }) {
           ))}
         </dl>
 
-        <p className="mt-4 select-all rounded-xl bg-paper p-3 text-[13px] leading-relaxed text-body">{text}</p>
+        <p className="mt-4 select-all rounded-xl bg-white/[0.05] p-3 text-[13px] leading-relaxed text-ink-soft">{text}</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
           <a
             href={`${base}?download=1`}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] bg-ink text-sm font-semibold text-white shadow-button transition hover:bg-black active:scale-[0.98]"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white text-sm font-semibold text-black transition hover:bg-white/90 active:translate-y-px"
           >
             <Download className="h-4 w-4" /> Télécharger
           </a>
           <button
             type="button"
             onClick={copy}
-            className="inline-flex h-11 items-center justify-center rounded-[14px] border border-black/10 text-sm font-semibold text-ink transition hover:bg-paper active:scale-[0.98]"
+            className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm font-semibold text-ink transition hover:bg-white/[0.08] active:translate-y-px"
           >
             {copied ? "Copié" : "Copier la légende"}
           </button>
@@ -201,9 +202,9 @@ function ShortCard({ jobId, clip }: { jobId: string; clip: Clip }) {
 
 function Notice({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-xl rounded-[28px] border border-black/5 bg-white p-8 text-center shadow-card">
+    <div className="mx-auto max-w-xl panel p-8 text-center">
       <h1 className="display text-3xl">{title}</h1>
-      <p className="mt-3 leading-relaxed text-body">{children}</p>
+      <p className="mt-3 leading-relaxed text-ink-soft">{children}</p>
       <ButtonLink href="/#top" className="mt-7">
         Découper une autre vidéo
       </ButtonLink>
@@ -218,9 +219,9 @@ export function ProjectView({ id }: { id: string }) {
     <>
       <SiteHeader guestLabel="Nouvelle vidéo" />
       <main className="relative isolate min-h-screen pb-20 pt-32 sm:pt-36">
-        <div className="sky absolute inset-x-0 top-0 -z-10 h-[30rem] opacity-70" />
+        <div className="glow absolute inset-x-0 top-0 -z-10 h-[34rem]" />
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          {load.kind === "loading" && <p className="text-center text-body">Chargement du projet…</p>}
+          {load.kind === "loading" && <p className="text-center text-ink-soft">Chargement du projet…</p>}
 
           {load.kind === "missing" && (
             <Notice title="Projet introuvable">
@@ -248,16 +249,16 @@ function Results({ job }: { job: JobState }) {
   return (
     <>
       <div className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-medium text-ink/70">
+        <p className="text-sm font-medium text-muted">
           {job.source.kind === "youtube" ? "Vidéo YouTube" : "Fichier d'essai"}
           {job.source.duration ? ` · ${clock(job.source.duration)}` : ""}
         </p>
         <h1 className="display mt-2 text-balance text-[clamp(1.9rem,5vw,2.9rem)] leading-[1.08]">
           {done ? (ready.length > 1 ? `Tes ${ready.length} shorts sont prêts` : "Ton short est prêt") : job.source.title}
         </h1>
-        {done && <p className="mt-3 text-[17px] text-body">{job.source.title}</p>}
+        {done && <p className="mt-3 text-[17px] text-ink-soft">{job.source.title}</p>}
         {job.layout === "facecam" && (
-          <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-medium text-ink shadow-card">
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[13px] font-medium text-ink-soft">
             <span className="h-1.5 w-1.5 rounded-full bg-pink" /> Facecam détectée : elle est placée en haut des shorts
           </p>
         )}

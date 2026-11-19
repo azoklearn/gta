@@ -152,7 +152,7 @@ async function pump(): Promise<void> {
   try {
     await queue.worker(id);
   } catch (err) {
-    console.error(`[viceclip] traitement ${id} en échec`, err);
+    console.error(`[gtaclip] traitement ${id} en échec`, err);
   } finally {
     queue.running = null;
     void pump();

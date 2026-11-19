@@ -1,27 +1,28 @@
 import Image from "next/image";
-import { gameImages } from "@/lib/images";
 import { ButtonLink } from "./Button";
+import { Eyebrow } from "./Section";
 
 export function FinalCta() {
   return (
-    <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 sm:pb-24">
-      <div className="relative isolate overflow-hidden rounded-[32px] px-7 py-14 shadow-float sm:px-14 sm:py-24">
+    <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
+      <div className="relative isolate flex flex-col items-center gap-5 overflow-hidden rounded-[30px] border border-white/10 px-6 py-16 text-center sm:py-24">
         <Image
-          src={gameImages.cta}
-          alt="Capture officielle de GTA VI : Vice City au crépuscule"
+          src="/images/city.jpg"
+          alt=""
           fill
           sizes="(min-width: 1152px) 1104px, 100vw"
           className="-z-20 object-cover object-[50%_40%]"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/45 sm:via-ink/60 sm:to-ink/10" />
-        <h2 className="display max-w-xl text-[clamp(2rem,5.4vw,3.25rem)] leading-[1.06] text-white">
-          Pendant qu&apos;ils jouent, tes shorts se préparent.
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,10,0.82),rgba(10,10,10,0.6)_45%,rgba(10,10,10,0.9))]" />
+        <Eyebrow className="bg-black/40 backdrop-blur-md">3 shorts offerts à l&apos;inscription</Eyebrow>
+        <h2 className="display max-w-2xl text-[clamp(2.1rem,6vw,3.6rem)] leading-none text-balance text-white">
+          Pendant qu&apos;ils jouent, <span className="text-gradient">tes shorts se préparent</span>.
         </h2>
-        <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
-          Colle la vidéo d&apos;un streamer GTA&nbsp;6 et récupère tes 3 premiers shorts, offerts à l&apos;inscription.
+        <p className="type-lead max-w-md text-balance text-ink-soft">
+          Colle la vidéo d&apos;un streamer GTA&nbsp;6 et récupère tes premiers shorts en quelques minutes.
         </p>
-        <ButtonLink href="#top" variant="light" className="mt-8 max-sm:w-full max-sm:justify-between">
-          Créer mes premiers shorts
+        <ButtonLink href="#top" size="lg" shine className="mt-2">
+          Commencer maintenant
         </ButtonLink>
       </div>
     </section>

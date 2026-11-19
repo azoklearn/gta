@@ -65,7 +65,7 @@ export async function refuseIfUnavailable(source: "youtube" | "upload"): Promise
   const { hosting, ffmpeg, ytdlp } = check.problems;
   const problem = hosting ?? ffmpeg ?? (source === "youtube" ? ytdlp : undefined);
   if (!problem) return null;
-  console.error(`[viceclip] découpage refusé : ${problem}`);
+  console.error(`[gtaclip] découpage refusé : ${problem}`);
   return Response.json({ error: problem }, { status: 503 });
 }
 

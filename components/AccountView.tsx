@@ -36,7 +36,7 @@ function usePaymentReturn(account: Account | null): "none" | "waiting" | "confir
 
 function Banner({ tone, children }: { tone: "info" | "good" | "warn"; children: React.ReactNode }) {
   const tones = {
-    info: "border-black/10 bg-white text-ink",
+    info: "border-white/12 bg-white/[0.04] text-ink",
     good: "border-cash/30 bg-cash/10 text-ink",
     warn: "border-orange/40 bg-orange/10 text-ink",
   };
@@ -62,7 +62,7 @@ export function AccountView() {
   }, [status, router]);
 
   if (status !== "ready" || !account) {
-    return <p className="text-center text-body">Chargement de ton compte…</p>;
+    return <p className="text-center text-ink-soft">Chargement de ton compte…</p>;
   }
 
   const plan = findPlan(account.plan);
@@ -82,7 +82,7 @@ export function AccountView() {
     <div className="mx-auto max-w-3xl space-y-5">
       <div>
         <h1 className="display text-[clamp(2rem,5vw,2.9rem)] leading-[1.08]">Mon compte</h1>
-        <p className="mt-2 text-body">{account.email}</p>
+        <p className="mt-2 text-ink-soft">{account.email}</p>
       </div>
 
       {payment === "waiting" && <Banner tone="info">Paiement en cours de confirmation par Mollie, un instant…</Banner>}
@@ -105,12 +105,12 @@ export function AccountView() {
         </Banner>
       )}
 
-      <section className="rounded-[28px] border border-black/5 bg-white p-7 shadow-card sm:p-9">
+      <section className="panel p-7 sm:p-9">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <p className="text-sm text-muted">Offre</p>
             <p className="display mt-1 text-3xl">{plan ? plan.name : "Essai gratuit"}</p>
-            <p className="mt-2 text-[15px] text-body">
+            <p className="mt-2 text-[15px] text-ink-soft">
               {plan
                 ? account.subscription === "canceled"
                   ? `Résiliée : elle reste active jusqu'au ${until}, puis s'arrête sans nouveau prélèvement.`
@@ -120,31 +120,28 @@ export function AccountView() {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted">Shorts restants</p>
-            <p className="display mt-1 text-5xl tabular-nums text-pink">{account.credits}</p>
+            <p className="display mt-1 text-5xl tabular-nums text-gradient">{account.credits}</p>
             {plan && <p className="mt-1 text-[13px] text-muted">sur {plan.shortsPerMonth} ce mois-ci</p>}
           </div>
         </div>
 
-        <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-black/[0.07] pt-6">
+        <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6">
           <ButtonLink href="/#top">Découper une vidéo</ButtonLink>
-          <Link
-            href="/#tarifs"
-            className="inline-flex h-[3.25rem] items-center rounded-[14px] border border-black/10 px-6 text-base font-semibold text-ink transition hover:bg-paper"
-          >
+          <ButtonLink href="/#tarifs" variant="ghost" arrow={false}>
             {plan ? "Changer d'offre" : "Voir les offres"}
-          </Link>
+          </ButtonLink>
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/5 bg-white p-7 shadow-card sm:p-9">
+      <section className="panel p-7 sm:p-9">
         <h2 className="display text-2xl">Mes projets récents</h2>
         {account.projects.length === 0 ? (
-          <p className="mt-3 text-body">Aucun découpage pour l&apos;instant. Colle le lien d&apos;une vidéo pour commencer.</p>
+          <p className="mt-3 text-ink-soft">Aucun découpage pour l&apos;instant. Colle le lien d&apos;une vidéo pour commencer.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-black/[0.07]">
+          <ul className="mt-4 divide-y divide-white/10">
             {account.projects.map((project) => (
               <li key={project.id}>
-                <Link href={`/projets/${project.id}`} className="flex items-center justify-between gap-4 py-3.5 transition hover:text-pink">
+                <Link href={`/projets/${project.id}`} className="flex items-center justify-between gap-4 py-3.5 transition hover:text-white text-ink-soft">
                   <span className="min-w-0 truncate font-medium">{project.title}</span>
                   <span className="shrink-0 text-[13px] text-muted">{dateFormat.format(new Date(project.createdAt))}</span>
                 </Link>
@@ -159,7 +156,7 @@ export function AccountView() {
         <button
           type="button"
           onClick={() => void signOut().then(() => router.push("/"))}
-          className="text-[15px] font-semibold text-ink underline decoration-black/25 underline-offset-4 hover:decoration-pink"
+          className="text-[15px] font-semibold text-ink underline decoration-white/30 underline-offset-4 hover:decoration-white"
         >
           Me déconnecter
         </button>
@@ -167,9 +164,9 @@ export function AccountView() {
         {plan && account.subscription === "active" && (
           <div className="text-right">
             {confirming ? (
-              <p className="flex flex-wrap items-center justify-end gap-3 text-[15px] text-body">
+              <p className="flex flex-wrap items-center justify-end gap-3 text-[15px] text-ink-soft">
                 Résilier l&apos;offre {plan.name} ? Elle restera active jusqu&apos;au {until}.
-                <button type="button" disabled={busy} onClick={cancel} className="font-semibold text-[#c2410c] hover:underline disabled:opacity-60">
+                <button type="button" disabled={busy} onClick={cancel} className="font-semibold text-[#ff9b7a] hover:underline disabled:opacity-60">
                   {busy ? "Résiliation…" : "Oui, résilier"}
                 </button>
                 <button type="button" disabled={busy} onClick={() => setConfirming(false)} className="font-semibold text-ink hover:underline">
@@ -181,7 +178,7 @@ export function AccountView() {
                 Résilier mon abonnement
               </button>
             )}
-            {error && <p className="mt-2 text-sm font-medium text-[#c2410c]">{error}</p>}
+            {error && <p className="mt-2 text-sm font-medium text-[#ff9b7a]">{error}</p>}
           </div>
         )}
       </section>

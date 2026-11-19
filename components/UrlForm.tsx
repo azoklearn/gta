@@ -6,7 +6,7 @@ import { isSignedIn, rememberUrl, startJob } from "@/lib/account";
 import { parseYouTubeId } from "@/lib/youtube";
 import { ArrowRight, LinkIcon } from "./Icons";
 
-export function UrlForm() {
+export function UrlForm({ id = "yt-url" }: { id?: string }) {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -39,19 +39,19 @@ export function UrlForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[38rem]">
+    <div className="mx-auto flex w-full max-w-[37rem] flex-col items-center gap-3">
       <form
         onSubmit={onSubmit}
         noValidate
-        className="flex gap-1.5 rounded-[20px] border border-black/5 bg-white p-1.5 shadow-float transition focus-within:border-pink/50"
+        className="flex w-full items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.05] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-colors focus-within:border-white/35"
       >
-        <label htmlFor="yt-url" className="sr-only">
+        <label htmlFor={id} className="sr-only">
           Lien de la vidéo YouTube
         </label>
-        <div className="flex min-w-0 flex-1 items-center gap-3 pl-3 pr-1 sm:px-4">
-          <LinkIcon className="hidden h-5 w-5 shrink-0 text-muted sm:block" />
+        <div className="flex min-w-0 flex-1 items-center gap-3 pr-1 pl-4 sm:pl-5">
+          <LinkIcon className="hidden size-5 shrink-0 text-muted sm:block" />
           <input
-            id="yt-url"
+            id={id}
             type="url"
             inputMode="url"
             autoComplete="off"
@@ -64,36 +64,26 @@ export function UrlForm() {
               setError(null);
             }}
             aria-invalid={error !== null}
-            aria-describedby="yt-url-msg"
-            className="h-[3.25rem] w-full min-w-0 bg-transparent text-base text-ink outline-none placeholder:text-muted disabled:opacity-60"
+            aria-describedby={`${id}-msg`}
+            className="h-12 w-full min-w-0 bg-transparent text-base text-ink outline-none placeholder:text-zinc-500 disabled:opacity-60 sm:h-[3.25rem] sm:text-[17px]"
           />
         </div>
         <button
           type="submit"
           disabled={busy}
-          className="group inline-flex h-[3.25rem] shrink-0 items-center justify-center gap-3 rounded-[14px] bg-ink pl-4 pr-2 text-base font-semibold tracking-tight text-white shadow-button transition hover:bg-black active:scale-[0.98] disabled:opacity-70 max-[359px]:pr-4 sm:gap-4 sm:pl-6"
+          className="button-shine inline-flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 text-[16px] font-semibold tracking-[-0.005em] whitespace-nowrap text-black transition-[transform,background-color] duration-150 hover:bg-white/90 focus-visible:ring-4 focus-visible:ring-white/30 active:translate-y-px disabled:opacity-70 sm:h-[3.25rem] sm:px-7 sm:text-[17px]"
         >
-          <span>
-            {busy ? (
-              "Lancement…"
-            ) : (
-              <>
-                Découper<span className="hidden sm:inline"> la vidéo</span>
-              </>
-            )}
-          </span>
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-ink transition group-hover:translate-x-0.5 max-[359px]:hidden">
-            <ArrowRight className="h-4 w-4" />
-          </span>
+          {busy ? "Lancement…" : "Découper"}
+          <ArrowRight className="size-4" />
         </button>
       </form>
 
-      <div id="yt-url-msg" aria-live="polite">
+      <div id={`${id}-msg`} aria-live="polite" className="empty:hidden">
         {error && (
-          <p className="mt-3 text-sm font-medium text-[#c2410c]">
+          <p className="text-center text-sm font-medium text-[#ff9b7a]">
             {error}{" "}
             {needsPlan && (
-              <a href="#tarifs" className="font-semibold text-ink underline decoration-pink underline-offset-4">
+              <a href="#tarifs" className="font-semibold text-white underline decoration-white/40 underline-offset-4">
                 Voir les offres
               </a>
             )}
@@ -101,7 +91,7 @@ export function UrlForm() {
         )}
       </div>
 
-      <p className="mt-3 text-[13px] text-muted sm:mt-4 sm:text-sm">3 shorts offerts à l&apos;inscription · Sans carte bancaire</p>
+      <p className="text-[13px] text-zinc-500 sm:text-sm">3 shorts offerts à l&apos;inscription · Sans carte bancaire</p>
     </div>
   );
 }

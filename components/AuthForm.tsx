@@ -33,19 +33,19 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   }
 
   const field =
-    "mt-1.5 h-12 w-full rounded-[14px] border border-black/10 bg-white px-4 text-base text-ink outline-none transition placeholder:text-muted focus:border-pink";
+    "mt-1.5 h-12 w-full rounded-[14px] border border-white/12 bg-white/[0.04] px-4 text-base text-ink outline-none transition placeholder:text-zinc-500 focus:border-white/40";
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-[28px] border border-black/5 bg-white p-7 shadow-card sm:p-9">
-      <h1 className="display text-3xl">{signup ? "Crée ton compte" : "Content de te revoir"}</h1>
-      <p className="mt-2 leading-relaxed text-body">
+    <div className="panel mx-auto w-full max-w-md p-7 sm:p-9">
+      <h1 className="display text-[2rem] leading-none">{signup ? "Crée ton compte" : "Content de te revoir"}</h1>
+      <p className="mt-2 leading-relaxed text-ink-soft">
         {signup
           ? `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`
           : "Connecte-toi pour retrouver tes shorts et ton offre."}
       </p>
 
       <form onSubmit={onSubmit} className="mt-7 space-y-4">
-        <label className="block text-sm font-medium text-ink">
+        <label className="block text-sm font-medium text-ink-soft">
           Adresse e-mail
           <input
             type="email"
@@ -57,7 +57,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
             className={field}
           />
         </label>
-        <label className="block text-sm font-medium text-ink">
+        <label className="block text-sm font-medium text-ink-soft">
           Mot de passe
           <input
             type="password"
@@ -71,25 +71,23 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
           />
         </label>
 
-        <p aria-live="polite" className="min-h-5 text-sm font-medium text-[#c2410c]">
+        <p aria-live="polite" className="min-h-5 text-sm font-medium text-[#ff9b7a]">
           {error}
         </p>
 
         <button
           type="submit"
           disabled={busy}
-          className="group inline-flex h-[3.25rem] w-full items-center justify-between rounded-[14px] bg-ink pl-6 pr-2 text-base font-semibold tracking-tight text-white shadow-button transition hover:bg-black active:scale-[0.98] disabled:opacity-70"
+          className="button-shine inline-flex h-[3.25rem] w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white text-[16.5px] font-semibold tracking-[-0.005em] text-black transition-[transform,background-color] duration-150 hover:bg-white/90 active:translate-y-px disabled:opacity-70"
         >
           {busy ? "Un instant…" : signup ? "Créer mon compte" : "Me connecter"}
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-ink transition group-hover:translate-x-0.5">
-            <ArrowRight className="h-4 w-4" />
-          </span>
+          <ArrowRight className="size-4" />
         </button>
       </form>
 
-      <p className="mt-6 text-center text-[15px] text-body">
+      <p className="mt-6 text-center text-[15px] text-ink-soft">
         {signup ? "Déjà un compte ? " : "Pas encore de compte ? "}
-        <Link href={signup ? "/connexion" : "/inscription"} className="font-semibold text-pink hover:underline">
+        <Link href={signup ? "/connexion" : "/inscription"} className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white">
           {signup ? "Me connecter" : "Créer un compte"}
         </Link>
       </p>

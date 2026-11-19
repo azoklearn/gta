@@ -32,7 +32,7 @@ export async function findFacecam(video: string, duration: number, width: number
     const script = path.join(process.cwd(), "tools", "facecam.py");
     detection = JSON.parse(await capture(config.python, [script, video, duration.toFixed(2), config.ffmpeg]));
   } catch (err) {
-    console.error("[viceclip] détection de la facecam indisponible", err);
+    console.error("[gtaclip] détection de la facecam indisponible", err);
     return null;
   }
   if (!detection.found) return null;

@@ -15,7 +15,7 @@ export const POST = api(async (request) => {
     return Response.json({ checkoutUrl: await startCheckout(user, body?.plan, site) });
   } catch (err) {
     if (err instanceof AccountError) throw err;
-    console.error("[viceclip:paiement] création du paiement en échec", err);
+    console.error("[gtaclip:paiement] création du paiement en échec", err);
     throw new AccountError("Le paiement n'a pas pu être préparé. Réessaie dans un instant.", 502);
   }
 });

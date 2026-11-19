@@ -1,9 +1,10 @@
 import { Plus } from "./Icons";
+import { SectionHeading } from "./Section";
 
 const QUESTIONS = [
   {
     q: "C'est quoi, le clipping ?",
-    a: "C'est découper les meilleurs moments d'une vidéo longue (un live, un let's play) pour en faire des shorts. ViceClip le fait automatiquement à partir des vidéos GTA 6 de youtubeurs et de streamers : tu récupères des shorts prêts à poster sur ton compte.",
+    a: "C'est découper les meilleurs moments d'une vidéo longue (un live, un let's play) pour en faire des shorts. GTAClip le fait automatiquement à partir des vidéos GTA 6 de youtubeurs et de streamers : tu récupères des shorts prêts à poster sur ton compte.",
   },
   {
     q: "Ai-je le droit de publier les moments d'un streamer ?",
@@ -15,7 +16,7 @@ const QUESTIONS = [
   },
   {
     q: "Qu'est-ce qui rend un short « optimisé » ?",
-    a: "Le passage est choisi là où le son et l'image s'emballent, avec une préférence pour ceux qui démarrent fort. Le short sort en plein écran vertical, avec la facecam du streamer en haut quand il y en a une, sous-titré, au-dessus d'une minute pour rester éligible à la rémunération, et reçoit un score qui te dit lequel publier en premier.",
+    a: "Le passage est choisi là où le son et l'image s'emballent, avec une préférence pour ceux qui démarrent fort. Le short sort en plein écran vertical, avec la facecam du streamer en haut quand il y en a une, titré, sous-titré, au-dessus d'une minute pour rester éligible à la rémunération, et reçoit un score qui te dit lequel publier en premier.",
   },
   {
     q: "Combien de temps prend le découpage ?",
@@ -41,25 +42,20 @@ const QUESTIONS = [
 
 export function Faq() {
   return (
-    <section id="faq" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
-      <div className="grid gap-7 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
-        <div>
-          <h2 className="display text-[clamp(2rem,5vw,2.9rem)] leading-[1.08]">Questions fréquentes</h2>
-          <p className="mt-4 max-w-sm text-[17px] leading-relaxed text-body">
-            L&apos;essentiel à savoir avant de poster ton premier clip.
-          </p>
-        </div>
-        <div className="border-t border-black/10">
-          {QUESTIONS.map(({ q, a }) => (
-            <details key={q} className="group border-b border-black/10">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-[17px] font-semibold tracking-tight sm:text-lg [&::-webkit-details-marker]:hidden">
-                {q}
-                <Plus className="h-5 w-5 shrink-0 text-muted transition group-open:rotate-45 group-open:text-pink" />
-              </summary>
-              <p className="max-w-2xl pb-6 leading-relaxed text-body">{a}</p>
-            </details>
-          ))}
-        </div>
+    <section id="faq" className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
+      <SectionHeading eyebrow="FAQ" title="Questions fréquentes">
+        L&apos;essentiel à savoir avant de poster ton premier clip.
+      </SectionHeading>
+      <div className="mt-10 flex flex-col gap-2.5 sm:mt-12">
+        {QUESTIONS.map(({ q, a }) => (
+          <details key={q} className="panel group px-5 open:bg-white/[0.03] sm:px-6">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4.5 text-left text-[16.5px] font-semibold tracking-[-0.01em] sm:text-[17.5px] [&::-webkit-details-marker]:hidden">
+              {q}
+              <Plus className="size-5 shrink-0 text-muted transition group-open:rotate-45 group-open:text-white" />
+            </summary>
+            <p className="pb-5 text-[15.5px] leading-relaxed text-muted">{a}</p>
+          </details>
+        ))}
       </div>
     </section>
   );

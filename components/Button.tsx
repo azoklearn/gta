@@ -1,40 +1,43 @@
+import Link from "next/link";
 import { ArrowRight } from "./Icons";
 
-const VARIANTS = {
-  dark: ["bg-ink text-white shadow-button hover:bg-black", "bg-white text-ink"],
-  pink: ["bg-pink text-white shadow-[0_10px_24px_-10px_rgb(255_46_139/0.9)] hover:brightness-105", "bg-white text-ink"],
-  light: ["bg-white text-ink shadow-card hover:bg-white/90", "bg-ink text-white"],
+const SIZES = {
+  sm: "h-10 px-4 text-[14px] gap-1.5",
+  md: "h-12 px-6 text-[15.5px] gap-2",
+  lg: "h-14 px-9 text-[17px] gap-2 sm:h-16 sm:px-11 sm:text-[18px]",
 } as const;
 
-/** Bouton principal : libellé suivi d'une pastille fléchée. */
+const VARIANTS = {
+  white: "bg-white text-black hover:bg-white/90",
+  ghost: "border border-white/12 bg-white/[0.04] text-ink hover:bg-white/[0.08]",
+} as const;
+
+/** Bouton en forme de pilule. Le bouton blanc est l'action principale de la page. */
 export function ButtonLink({
   href,
   children,
-  variant = "dark",
+  variant = "white",
   size = "md",
+  shine = false,
+  arrow = true,
   className = "",
-  dotClassName = "",
 }: {
   href: string;
   children: React.ReactNode;
   variant?: keyof typeof VARIANTS;
-  size?: "sm" | "md";
+  size?: keyof typeof SIZES;
+  /** Fait passer un reflet sur le bouton, pour l'action principale. */
+  shine?: boolean;
+  arrow?: boolean;
   className?: string;
-  /** Classes ajoutées à la pastille fléchée (par exemple pour la masquer sur très petit écran). */
-  dotClassName?: string;
 }) {
-  const [shell, dot] = VARIANTS[variant];
-  const sizing = size === "sm" ? "h-11 pl-4 pr-1.5 text-sm gap-2.5" : "h-[3.25rem] pl-6 pr-2 text-base gap-4";
-  const dotSize = size === "sm" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <a
+    <Link
       href={href}
-      className={`group inline-flex items-center rounded-[14px] font-semibold tracking-tight transition active:scale-[0.98] ${sizing} ${shell} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-semibold tracking-[-0.005em] whitespace-nowrap outline-none transition-[transform,background-color] duration-150 select-none focus-visible:ring-4 focus-visible:ring-white/30 active:translate-y-px ${SIZES[size]} ${VARIANTS[variant]} ${shine ? "button-shine" : ""} ${className}`}
     >
       {children}
-      <span className={`grid place-items-center rounded-full transition group-hover:translate-x-0.5 ${dotSize} ${dot} ${dotClassName}`}>
-        <ArrowRight className="h-4 w-4" />
-      </span>
-    </a>
+      {arrow && <ArrowRight className="size-4" />}
+    </Link>
   );
 }

@@ -1,170 +1,106 @@
 import Image from "next/image";
-import { gameImages } from "@/lib/images";
-import { WantedStars } from "./Icons";
+import { demo } from "@/lib/demo";
 import { SectionHeading } from "./Section";
 
-function Card({
-  title,
-  text,
-  className = "",
-  children,
-}: {
-  title: string;
-  text: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
+function Card({ children, glow }: { children: React.ReactNode; glow: string }) {
   return (
-    <li className={`flex flex-col overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-card ${className}`}>
-      <div className="p-6 pb-0 sm:p-8 sm:pb-0">
-        <h3 className="display text-[1.45rem] leading-tight">{title}</h3>
-        <p className="mt-2 max-w-md leading-relaxed text-body">{text}</p>
-      </div>
-      <div className="mt-6 flex flex-1 flex-col justify-end px-6 pb-6 sm:mt-7 sm:px-8 sm:pb-8">{children}</div>
-    </li>
+    <div className="relative isolate">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-8 -bottom-3 -z-10 h-16 rounded-full opacity-40 blur-2xl"
+        style={{ background: glow }}
+      />
+      <article className="panel relative isolate flex h-full flex-col overflow-hidden">{children}</article>
+    </div>
   );
 }
 
-const SCORE = [
-  ["Accroche", 94],
-  ["Action", 88],
-  ["Rythme", 76],
-] as const;
+function Copy({ label, title, children }: { label: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-auto flex flex-col gap-2 px-5 pt-4 pb-6 sm:px-6">
+      <p className="text-[14px] font-semibold text-white/50">{label}</p>
+      <h3 className="text-[22px] leading-tight font-semibold tracking-[-0.03em]">{title}</h3>
+      <p className="text-[15px] leading-relaxed text-muted">{children}</p>
+    </div>
+  );
+}
+
+const BARS = [0, 0.35, 0.15, 0.5, 0.25];
 
 export function Features() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
-      <SectionHeading title="Des shorts optimisés pour devenir viraux">
-        Chaque réglage vise la même chose : arrêter le scroll et garder le spectateur jusqu&apos;au bout.
+    <section id="fonctionnement" className="mx-auto w-full max-w-6xl px-4 pt-14 pb-20 sm:px-6 sm:pt-20 sm:pb-28">
+      <SectionHeading
+        eyebrow="Ce que fait l'IA"
+        title={
+          <>
+            GTAClip <span className="text-gradient">fait tout pour toi</span>.
+          </>
+        }
+      >
+        Le repérage, le titre et le montage&nbsp;: tu colles un lien, GTAClip s&apos;occupe du reste.
       </SectionHeading>
 
-      <ul className="mt-9 grid gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">
-        {/* Recadrage */}
-        <Card
-          className="lg:col-span-2"
-          title="Plein écran vertical, sans bandes noires"
-          text="Le jeu est recadré au centre, là où se trouve le personnage, et remplit l'écran du téléphone. Si le streamer a une facecam, elle est repérée et placée en haut, le jeu en dessous."
-        >
-          <div className="relative overflow-hidden rounded-2xl">
-            <Image
-              src={gameImages.reframe}
-              alt="Capture officielle de GTA VI recadrée au format vertical"
-              width={1800}
-              height={1013}
-              sizes="(min-width: 1024px) 680px, 90vw"
-              className="aspect-[16/8.2] w-full object-cover object-[50%_42%]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-y-3 left-[41%] aspect-[9/16] rounded-xl border-2 border-white shadow-[0_0_0_9999px_rgb(19_19_19/0.55)]"
-            >
-              <span className="absolute -top-px left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-ink">
-                9:16
-              </span>
-            </div>
-            <span className="absolute bottom-3 left-3 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur">
-              Source 16:9
-            </span>
+      <div className="mt-12 grid gap-4 sm:mt-14 md:grid-cols-3">
+        <Card glow="rgba(255,255,255,0.35)">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5">
+            {demo.sources.slice(0, 4).map((src) => (
+              <div key={src} className="relative aspect-video overflow-hidden rounded-[12px] bg-black">
+                <Image src={src} alt="" fill sizes="(min-width: 768px) 180px, 50vw" className="object-cover" />
+              </div>
+            ))}
           </div>
+          <Copy label="Repérage" title="Les meilleurs moments, trouvés pour toi">
+            L&apos;IA regarde toute la vidéo du streamer, repère là où le son et l&apos;image s&apos;emballent et garde
+            les passages qui démarrent fort.
+          </Copy>
         </Card>
 
-        {/* Score Wanted */}
-        <Card
-          title="Le score Wanted"
-          text="Chaque short reçoit de 1 à 5 étoiles, calculées à partir du son et de l'image. Les passages qui démarrent fort sont favorisés."
-        >
-          <div className="rounded-2xl border border-black/5 bg-paper p-5">
-            <div className="flex items-center justify-between">
-              <WantedStars level={5} className="h-5" />
-              <span className="display text-3xl tabular-nums">94</span>
-            </div>
-            <dl className="mt-5 space-y-3.5">
-              {SCORE.map(([label, value]) => (
-                <div key={label}>
-                  <div className="flex justify-between text-[13px]">
-                    <dt className="text-body">{label}</dt>
-                    <dd className="font-medium tabular-nums text-ink">{value}</dd>
-                  </div>
-                  <div className="mt-1.5 h-1.5 rounded-full bg-black/[0.07]">
-                    <div className="h-full rounded-full bg-pink" style={{ width: `${value}%` }} />
-                  </div>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-5 border-t border-black/[0.07] pt-4 text-[13px] text-body">
-              Note globale <span className="font-semibold text-ink">94 sur 100</span> : à publier en premier.
-            </p>
-          </div>
-        </Card>
-      </ul>
-
-      {/* Trois cartes : carrousel à faire défiler sur téléphone et tablette, grille sur ordinateur */}
-      <ul className="no-scrollbar -mx-4 -mb-6 -mt-2 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 py-6 sm:-mx-6 sm:scroll-px-6 sm:gap-5 sm:px-6 lg:mx-0 lg:-mt-1 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
-        {/* Sous-titres */}
-        <Card
-          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
-          title="Des sous-titres qui retiennent"
-          text="Ce que dit le streamer est incrusté à l'écran à partir des sous-titres YouTube. Le mot prononcé passe en couleur."
-        >
-          <div className="relative overflow-hidden rounded-2xl">
-            <Image
-              src={gameImages.clips[1]}
-              alt=""
-              width={720}
-              height={1067}
-              sizes="(min-width: 1024px) 320px, 90vw"
-              className="aspect-[4/3] w-full object-cover object-[50%_12%]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
-            <p className="display absolute inset-x-0 bottom-4 text-center text-xl uppercase leading-tight tracking-tight text-white [text-shadow:0_2px_0_rgb(0_0_0/0.55)]">
-              Personne ne les a
-              <br />
-              <span className="rounded-md bg-pink px-1.5">vus venir</span>
-            </p>
-          </div>
+        <Card glow="rgba(255,46,139,0.6)">
+          <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.032),transparent_70%)]" />
+          <ul className="flex flex-col gap-2.5 p-4">
+            {demo.picks.map((short, i) => (
+              <li key={short.image} className="flex items-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-3 py-2.5">
+                <span className="relative size-10 shrink-0 overflow-hidden rounded-full border border-white/10 bg-black">
+                  <Image src={short.image} alt="" fill sizes="40px" className="object-cover" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[14px] font-semibold text-ink">
+                    {short.title || `Short n° ${i + 1} · ${short.channel}`}
+                  </span>
+                  <span className="truncate text-[13px] text-muted">
+                    {short.title ? `${short.channel} · ` : ""}score {short.score} sur 100 · sous-titré
+                  </span>
+                </span>
+                <span className="flex h-5 items-end gap-[3px]" aria-hidden="true">
+                  {BARS.map((delay) => (
+                    <span
+                      key={delay}
+                      className="w-[3px] animate-[bar_1.1s_ease-in-out_infinite] rounded-full bg-white/25"
+                      style={{ animationDelay: `${delay}s` }}
+                    />
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Copy label="Titre et sous-titres" title="Un titre qui donne envie de rester">
+            Chaque short reçoit un titre écrit par l&apos;IA d&apos;après ce qui s&apos;y passe, des sous-titres mot à mot
+            et une description prête à coller.
+          </Copy>
         </Card>
 
-        {/* Titres et hashtags */}
-        <Card
-          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
-          title="Légende et hashtags"
-          text="Une légende et des hashtags GTA 6 pour chaque short. Tu copies, tu colles, tu publies."
-        >
-          <div className="rounded-2xl border border-black/5 bg-paper p-5">
-            <p className="text-[13px] text-muted">Légende proposée</p>
-            <p className="mt-1 font-semibold leading-snug text-ink">Braquage en direct à Vice City (partie 1)</p>
-            <ul className="mt-4 flex flex-wrap gap-1.5">
-              {["#gta6", "#gtavi", "#vicecity", "#gaming", "#clips"].map((t) => (
-                <li key={t} className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[13px] text-body">
-                  {t}
-                </li>
-              ))}
-            </ul>
+        <Card glow="rgba(44,209,66,0.5)">
+          <div className="flex min-h-[210px] flex-1 flex-col items-center justify-center gap-1 px-4 text-center">
+            <span className="display text-[64px] leading-none text-white">0 min</span>
+            <span className="text-[15px] text-ink-soft">de montage à faire</span>
           </div>
+          <Copy label="Montage automatique" title="Monté et prêt à poster">
+            Facecam en haut, jeu en dessous&nbsp;: ton short sort en MP4 1080&nbsp;×&nbsp;1920, à plus d&apos;une minute pour
+            rester éligible à la rémunération TikTok.
+          </Copy>
         </Card>
-
-        {/* Durée */}
-        <Card
-          className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
-          title="Calé au-dessus d'une minute"
-          text="TikTok ne rémunère que les vidéos de plus d'une minute. Chaque découpe franchit le seuil."
-        >
-          <div className="rounded-2xl border border-black/5 bg-paper p-5">
-            <div className="flex items-baseline justify-between">
-              <span className="display text-3xl tabular-nums">1:04</span>
-              <span className="rounded-full bg-cash/10 px-2.5 py-1 text-xs font-semibold text-cash">Éligible</span>
-            </div>
-            <div className="relative mt-6 h-2 rounded-full bg-black/[0.07]">
-              <div className="h-full w-[82%] rounded-full bg-cash" />
-              <span className="absolute -top-2 left-[76%] h-6 w-0.5 rounded-full bg-ink" />
-            </div>
-            <div className="relative mt-2 h-4 text-[11px] tabular-nums text-muted">
-              <span className="absolute left-0">0:00</span>
-              <span className="absolute left-[76%] -translate-x-1/2 font-medium text-ink">1:00</span>
-            </div>
-          </div>
-        </Card>
-      </ul>
+      </div>
     </section>
   );
 }

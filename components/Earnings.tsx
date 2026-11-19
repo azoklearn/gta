@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check } from "./Icons";
+import { SectionHeading } from "./Section";
 
 const VIEW_STEPS = [1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000, 500_000, 1_000_000];
 const DAYS_PER_MONTH = 30;
@@ -41,7 +42,7 @@ function Slider({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="text-[15px] text-white/60">
+        <label htmlFor={id} className="text-[15px] text-muted">
           {label}
         </label>
         <output htmlFor={id} className="display text-xl tabular-nums text-white">
@@ -75,35 +76,36 @@ export function Earnings() {
   const monthly = (monthlyViews / 1000) * (rpmCents / 100);
 
   return (
-    <section id="revenus" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-24">
-      <div className="rounded-[28px] bg-ink text-white shadow-float sm:rounded-[32px]">
+    <section id="revenus" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <SectionHeading
+        eyebrow="Rémunération TikTok"
+        title={
+          <>
+            Combien ça peut <span className="text-gradient">rapporter</span>&nbsp;?
+          </>
+        }
+      >
+        Avec le programme Creator Rewards, TikTok paie chaque millier de vues qualifiées sur les vidéos de plus
+        d&apos;une minute. Fais le calcul avec tes chiffres.
+      </SectionHeading>
+
+      <div className="panel mt-10 overflow-hidden sm:mt-14">
         <div className="grid lg:grid-cols-[1.1fr_1fr]">
           {/* Réglages */}
-          <div className="p-6 sm:p-12">
-            <p className="text-sm font-medium text-pink">Rémunération TikTok</p>
-            <h2 className="display mt-3 text-[clamp(2rem,5vw,2.9rem)] leading-[1.08]">
-              Combien ça peut rapporter ?
-            </h2>
-            <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/60">
-              Avec le programme Creator Rewards, TikTok paie chaque millier de vues qualifiées sur les vidéos de
-              plus d&apos;une minute. Fais le calcul avec tes chiffres.
-            </p>
-
+          <div className="p-5 sm:p-10">
             {/* Mobile : le résultat reste collé sous la barre de navigation pendant qu'on règle les curseurs */}
             <div
               aria-live="polite"
-              className="sticky top-[5.5rem] z-10 -mx-2 mt-6 rounded-2xl border border-white/10 bg-[#222] px-5 py-4 shadow-[0_18px_30px_-18px_rgb(0_0_0/0.9)] lg:hidden"
+              className="sticky top-[5rem] z-10 -mx-1 mb-6 rounded-[18px] border border-white/10 bg-[#141416] px-5 py-4 shadow-[0_18px_30px_-18px_rgb(0_0_0/0.9)] lg:hidden"
             >
-              <p className="text-sm text-white/60">Revenu mensuel estimé</p>
-              <p className="display mt-0.5 text-[2.9rem] leading-none tabular-nums text-cash-bright">
-                {euros.format(monthly)}
-              </p>
-              <p className="mt-2 text-[13px] tabular-nums text-white/60">
+              <p className="text-sm text-muted">Revenu mensuel estimé</p>
+              <p className="display mt-0.5 text-[2.9rem] leading-none tabular-nums text-cash">{euros.format(monthly)}</p>
+              <p className="mt-2 text-[13px] tabular-nums text-muted">
                 {compact.format(monthlyViews)} vues par mois · {euros.format(monthly * 12)} par an
               </p>
             </div>
 
-            <div className="mt-7 space-y-5 sm:mt-10 sm:space-y-7">
+            <div className="space-y-5 sm:space-y-7">
               <Slider
                 id="per-day"
                 label="Shorts publiés par jour"
@@ -135,18 +137,29 @@ export function Earnings() {
                 onChange={setRpmCents}
               />
             </div>
+
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <p className="text-[14px] font-semibold text-white/50">Ce que TikTok demande</p>
+              <ul className="mt-3 grid gap-x-6 gap-y-2.5 text-[14.5px] text-ink-soft sm:grid-cols-2">
+                {REQUIREMENTS.map((r) => (
+                  <li key={r} className="flex items-center gap-2">
+                    <Check className="size-4 shrink-0 text-cash" /> {r}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Résultat */}
-          <div className="flex flex-col justify-between rounded-b-[28px] border-t border-white/10 bg-white/[0.04] p-6 sm:rounded-b-[32px] sm:p-12 lg:rounded-bl-none lg:rounded-r-[32px] lg:border-l lg:border-t-0">
+          <div className="flex flex-col justify-between border-t border-white/10 bg-white/[0.025] p-5 sm:p-10 lg:border-t-0 lg:border-l">
             <div>
               <div aria-live="polite" className="hidden lg:block">
-                <p className="text-[15px] text-white/60">Revenu mensuel estimé</p>
-                <p className="display mt-2 text-[clamp(3.5rem,9vw,5.25rem)] leading-none tabular-nums text-cash-bright">
+                <p className="text-[15px] text-muted">Revenu mensuel estimé</p>
+                <p className="display mt-2 text-[clamp(3.5rem,9vw,5.25rem)] leading-none tabular-nums text-cash">
                   {euros.format(monthly)}
                 </p>
               </div>
-              <p className="display text-lg lg:hidden">Le détail du calcul</p>
+              <p className="text-[14px] font-semibold text-white/50 lg:hidden">Le détail du calcul</p>
               <dl className="mt-4 divide-y divide-white/10 border-y border-white/10 text-[15px] lg:mt-8">
                 {[
                   ["Shorts publiés par mois", plain.format(shortsPerMonth)],
@@ -155,30 +168,18 @@ export function Earnings() {
                   ["Sur un an", euros.format(monthly * 12)],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-3.5">
-                    <dt className="text-white/60">{k}</dt>
+                    <dt className="text-muted">{k}</dt>
                     <dd className="font-medium tabular-nums">{v}</dd>
                   </div>
                 ))}
               </dl>
             </div>
-            <p className="mt-6 text-[13px] leading-relaxed text-white/45 sm:mt-8">
-              Simulation indicative, sans garantie de revenus. Le RPM varie selon ton audience, ton pays et la
-              durée de visionnage ; seules les vues jugées qualifiées par TikTok sont rémunérées.
+            <p className="mt-6 text-[13px] leading-relaxed text-zinc-500 sm:mt-8">
+              Simulation indicative, sans garantie de revenus. Le RPM varie selon ton audience, ton pays et la durée
+              de visionnage ; seules les vues jugées qualifiées par TikTok sont rémunérées.
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Conditions du programme */}
-      <div className="mt-4 flex flex-col gap-4 rounded-[24px] border border-black/5 bg-white px-6 py-6 shadow-card sm:mt-5 sm:px-7 lg:flex-row lg:items-center lg:gap-8">
-        <p className="display shrink-0 text-lg">Ce que TikTok demande</p>
-        <ul className="grid gap-x-6 gap-y-2.5 text-[15px] text-body sm:flex sm:flex-wrap">
-          {REQUIREMENTS.map((r) => (
-            <li key={r} className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-cash" /> {r}
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
   );

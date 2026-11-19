@@ -1,30 +1,35 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const instrument = Instrument_Sans({
-  variable: "--font-instrument",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "ViceClip — Les meilleurs moments des streamers GTA 6, en shorts prêts à poster",
+  metadataBase: new URL("https://gtaclip.io"),
+  title: "GTAClip — Les lives GTA 6 des streamers, en shorts prêts à poster",
   description:
-    "Colle la vidéo d'un youtubeur ou d'un streamer GTA 6 : ViceClip repère les meilleurs moments et te livre des shorts verticaux sous-titrés, prêts à poster et optimisés pour devenir viraux sur TikTok.",
+    "Colle le lien YouTube d'un streamer qui joue à GTA 6 : GTAClip repère les meilleurs moments et te livre des shorts verticaux titrés et sous-titrés, prêts à poster sur TikTok.",
+  openGraph: {
+    title: "GTAClip — Les lives GTA 6 des streamers, en shorts prêts à poster",
+    description:
+      "Colle un lien YouTube, récupère des shorts titrés, sous-titrés et prêts à poster sur TikTok, Reels et YouTube Shorts.",
+    url: "https://gtaclip.io",
+    siteName: "GTAClip",
+    locale: "fr_FR",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f6f4",
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${instrument.variable} ${inter.variable} antialiased`}>
+    <html lang="fr" className={`${jakarta.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );

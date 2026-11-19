@@ -29,7 +29,7 @@ export function WantedStars({
   level,
   className = "",
   onColor = "text-pink",
-  offColor = "text-black/15",
+  offColor = "text-white/15",
 }: {
   level: number;
   className?: string;
@@ -95,7 +95,7 @@ export const TikTokGlyph = ({ className }: IconProps) => (
         key={fill as string}
         transform={`translate(${dx} ${dy})`}
         fill={fill as string}
-        d="M17.2 4h3.6c.3 2.7 1.9 4.6 4.7 4.9v3.7c-1.7.1-3.3-.4-4.7-1.300v7.400a6.8 6.8 0 1 1-6.8-6.800c.4 0 .8 0 1.2.1v3.800a3.1 3.1 0 1 0 2 2.900z"
+        d="M17.2 4h3.6c.3 2.7 1.9 4.6 4.7 4.9v3.7c-1.7.1-3.3-.4-4.7-1.3v7.4a6.8 6.8 0 1 1-6.8-6.8c.4 0 .8 0 1.2.1v3.8a3.1 3.1 0 1 0 2 2.9z"
       />
     ))}
   </svg>
@@ -113,5 +113,66 @@ export const ReelsGlyph = ({ className }: IconProps) => (
     <rect x="4.5" y="4.5" width="23" height="23" rx="7" fill="none" stroke="url(#reels-g)" strokeWidth="2.6" />
     <circle cx="16" cy="16" r="5" fill="none" stroke="url(#reels-g)" strokeWidth="2.6" />
     <circle cx="22.3" cy="9.7" r="1.5" fill="#d62976" />
+  </svg>
+);
+
+export const Volume = ({ className }: IconProps) => (
+  <svg {...base} strokeWidth={2} className={className}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+    <path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" />
+  </svg>
+);
+export const VolumeOff = ({ className }: IconProps) => (
+  <svg {...base} strokeWidth={2} className={className}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+    <path d="M16 9.5l5 5M21 9.5l-5 5" />
+  </svg>
+);
+export const TrendUp = ({ className }: IconProps) => (
+  <svg {...base} strokeWidth={2.6} className={className}>
+    <path d="M6 17L17 6M9 6h8v8" />
+  </svg>
+);
+
+/* Plateformes de destination, en une seule couleur (celle du texte) */
+export const TikTokMark = ({ className }: IconProps) => (
+  <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M17.2 4h3.6c.3 2.7 1.9 4.6 4.7 4.9v3.7c-1.7.1-3.3-.4-4.7-1.3v7.4a6.8 6.8 0 1 1-6.8-6.8c.4 0 .8 0 1.2.1v3.8a3.1 3.1 0 1 0 2 2.9z"
+    />
+  </svg>
+);
+export const YouTubeMark = ({ className }: IconProps) => (
+  <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M8 7h16a6 6 0 0 1 6 6v6a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6v-6a6 6 0 0 1 6-6zm5.5 5v8l7-4z"
+    />
+  </svg>
+);
+export const InstagramMark = ({ className }: IconProps) => (
+  <svg viewBox="0 0 32 32" className={className} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.6">
+    <rect x="4.5" y="4.5" width="23" height="23" rx="7" />
+    <circle cx="16" cy="16" r="5" />
+    <circle cx="22.3" cy="9.7" r="1.3" fill="currentColor" stroke="none" />
+  </svg>
+);
+export const FacebookMark = ({ className }: IconProps) => (
+  <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M16 3a13 13 0 0 0-2.2 25.8v-9h-3.2V16h3.2v-2.9c0-3.2 1.9-4.9 4.8-4.9 1.4 0 2.8.2 2.8.2v3.1h-1.6c-1.6 0-2 1-2 2V16h3.5l-.6 3.8h-2.9v9A13 13 0 0 0 16 3z"
+    />
+  </svg>
+);
+export const SnapchatMark = ({ className }: IconProps) => (
+  <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M16 4c3.9 0 6.6 2.9 6.6 6.8 0 1-.1 2-.1 2.7.5.3 1.3-.2 1.9-.2.8 0 1.5.5 1.5 1.2 0 1.1-1.7 1.5-2.6 2 .7 2.1 2.3 3.8 4.3 4.5.5.2.7.5.6.9-.3.9-2 1.1-3.1 1.4-.3.5-.1 1.3-.9 1.4-1 .1-2.1-.4-3.4.1-1.3.5-2.4 2.2-4.8 2.2s-3.5-1.7-4.8-2.2c-1.3-.5-2.4 0-3.4-.1-.8-.1-.6-.9-.9-1.4-1.1-.3-2.8-.5-3.1-1.4-.1-.4.1-.7.6-.9 2-.7 3.6-2.4 4.3-4.5-.9-.5-2.6-.9-2.6-2 0-.7.7-1.2 1.5-1.2.6 0 1.4.5 1.9.2 0-.7-.1-1.7-.1-2.7C9.4 6.9 12.1 4 16 4z"
+    />
   </svg>
 );

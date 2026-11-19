@@ -1,6 +1,6 @@
-# ViceClip
+# GTAClip
 
-ViceClip est un outil de clipping : il transforme les vidéos et les lives GTA 6 de youtubeurs et de streamers en shorts verticaux prêts à poster sur TikTok, Shorts et Reels. On colle le lien d'une vidéo YouTube, le serveur repère les passages les plus intenses, les recadre en 9:16, incruste les sous-titres et propose les shorts au téléchargement.
+GTAClip ([gtaclip.io](https://gtaclip.io)) est un outil de clipping : il transforme les vidéos et les lives GTA 6 de youtubeurs et de streamers en shorts verticaux prêts à poster sur TikTok, Shorts et Reels. On colle le lien d'une vidéo YouTube, le serveur repère les passages les plus intenses, les recadre en 9:16, incruste un titre écrit par une IA et les sous-titres, puis propose les shorts au téléchargement.
 
 ## Lancer le projet
 
@@ -23,8 +23,9 @@ Le site est servi sur http://localhost:3000.
 2. **Récupération** : yt-dlp télécharge la vidéo en 1080p au maximum, ainsi que ses sous-titres (manuels ou automatiques) quand il y en a.
 3. **Analyse** : ffmpeg mesure le niveau sonore seconde par seconde et les changements à l'image. Les fenêtres les plus intenses sont retenues sans chevauchement, avec un bonus quand le début est fort. Le score de 1 à 5 étoiles vient de ces mesures.
 4. **Facecam** : un visage qui revient au même endroit tout au long de la vidéo est celui du streamer ; le cadre de sa facecam est délimité par la zone qui reste immobile autour (`tools/facecam.py`, avec OpenCV).
-5. **Rendu** : chaque passage sort en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres. Avec une facecam, elle occupe le tiers haut et le jeu les deux tiers du bas ; sinon le jeu, recadré au centre, remplit l'écran.
-6. La page `/projets/<id>` suit l'avancement puis affiche les shorts, à lire et à télécharger. Ils sont supprimés au bout de 24 heures.
+5. **Titre** : Claude reçoit quelques images de chaque passage et ce qui s'y dit, et écrit le titre incrusté, la description et les hashtags (`lib/server/titles.ts`, une seule requête par vidéo). Sans clé `ANTHROPIC_API_KEY`, ou si la requête échoue, les shorts sortent sans titre.
+6. **Rendu** : chaque passage sort en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres. Avec une facecam, elle occupe le tiers haut et le jeu les deux tiers du bas, le titre se plaçant juste sous la facecam ; sinon le jeu, recadré au centre, remplit l'écran.
+7. La page `/projets/<id>` suit l'avancement puis affiche les shorts, à lire et à télécharger. Ils sont supprimés au bout de 24 heures.
 
 ## Comptes et abonnements
 
@@ -51,23 +52,26 @@ Ce qui manque encore : réinitialisation du mot de passe (aucun envoi d'e-mail n
 
 - `app/page.tsx` : page d'accueil, une section par fichier dans `components/`.
 - `app/projets/[id]/page.tsx` et `components/ProjectView.tsx` : suivi d'un découpage et résultats.
-- `app/api/jobs/` : création d'un traitement, état, lecture et téléchargement des shorts. `app/api/health` : diagnostic du serveur.
+- `app/api/jobs/` : création d'un traitement, état, lecture et téléchargement des shorts, image de la vidéo d'origine. `app/api/health` : diagnostic du serveur.
 - `lib/server/pipeline.ts` : enchaînement des étapes.
-- `lib/server/youtube.ts` : appels à yt-dlp. `lib/server/analyze.ts` : détection des passages. `lib/server/subtitles.ts` : sous-titres. `lib/server/render.ts` : rendu ffmpeg.
+- `lib/server/youtube.ts` : appels à yt-dlp. `lib/server/analyze.ts` : détection des passages. `lib/server/titles.ts` : titres écrits par l'IA. `lib/server/subtitles.ts` : sous-titres et bandeau du titre. `lib/server/render.ts` : rendu ffmpeg.
 - `lib/server/jobs.ts` : stockage des traitements sur disque et file d'attente en mémoire.
 - `lib/plans.ts` : offres. `lib/server/auth.ts` : comptes, sessions et quotas. `lib/server/billing.ts` : abonnements Mollie.
 - `app/inscription`, `app/connexion`, `app/compte` : pages du compte ; `lib/account.ts` garde la session côté navigateur.
-- `lib/images.ts` et `public/images/` : visuels officiels de GTA VI (ils appartiennent à Rockstar Games).
+- `lib/demo.ts` et `public/demo/` : visuels de la page d'accueil, tirés de vraies vidéos de streamers et des shorts que l'outil en a produits. Ces vidéos appartiennent à leurs créateurs : demande leur accord avant d'en faire la vitrine du site.
+- `public/images/city.jpg` : visuel officiel de GTA VI (il appartient à Rockstar Games).
 
 ## Réglages
 
-Variables d'environnement, toutes facultatives :
+Variables d'environnement, toutes facultatives (elles gardent le préfixe `VICECLIP_`, premier nom du projet) :
 
 | Variable | Rôle | Valeur par défaut |
 | --- | --- | --- |
 | `VICECLIP_DATA_DIR` | Dossier des vidéos en cours et des shorts (temporaire) | `./data` |
 | `VICECLIP_DB_DIR` | Dossier de la base des comptes (persistant) | celui de `VICECLIP_DATA_DIR` |
 | `MOLLIE_API_KEY` | Clé d'API Mollie (`test_…` pour les essais, `live_…` en production). Sans elle, les abonnements sont désactivés | aucune |
+| `ANTHROPIC_API_KEY` | Clé d'API Anthropic, pour le titre, la description et les hashtags écrits par l'IA. Sans elle, les shorts sortent sans titre | aucune |
+| `VICECLIP_TITLE_MODEL` | Modèle Claude qui écrit les titres | `claude-opus-5-5` |
 | `VICECLIP_PUBLIC_URL` | Adresse publique du serveur, appelée par Mollie pour ses notifications | déduite de `RAILWAY_PUBLIC_DOMAIN` |
 | `VICECLIP_MAX_MINUTES` | Plafond du serveur pour la durée d'une vidéo source, quelle que soit l'offre | `90` |
 | `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir la route d'essai `POST /api/jobs/upload` (import direct d'un fichier, non proposé sur le site) | fermée |
@@ -89,7 +93,7 @@ Le découpage tourne en tâche de fond, utilise ffmpeg et yt-dlp et écrit sur l
 Le même dépôt est déployé deux fois : Vercel sert les pages, un second serveur exécute le découpage. Le navigateur envoie les vidéos et lit les shorts directement sur ce second serveur.
 
 1. **Serveur de découpage.** Déploie ce dépôt avec son `Dockerfile` sur un hébergeur de conteneurs (Railway, Render, Fly.io) ou un VPS. L'application écoute sur le port 3000, ou sur celui de la variable `PORT`. Il lui faut une adresse publique en HTTPS.
-2. Sur ce serveur, règle `VICECLIP_ALLOWED_ORIGINS` avec l'adresse du site, par exemple `https://ton-site.vercel.app`. Plusieurs adresses se séparent par des virgules, et `https://*.vercel.app` couvre les déploiements de prévisualisation.
+2. Sur ce serveur, règle `VICECLIP_ALLOWED_ORIGINS` avec l'adresse du site, par exemple `https://gtaclip.io,https://www.gtaclip.io`. Plusieurs adresses se séparent par des virgules, et `https://*.vercel.app` couvre les déploiements de prévisualisation.
 3. Ouvre `https://<serveur>/api/health` : la réponse doit contenir `"ok": true`. Sinon elle dit ce qui manque.
 4. **Site.** Sur Vercel, ajoute la variable d'environnement `NEXT_PUBLIC_VICECLIP_API` avec l'adresse du serveur de découpage (`https://<serveur>`, sans chemin), puis redéploie : cette variable est lue au moment de la construction du site.
 
@@ -111,4 +115,4 @@ YouTube refuse souvent les téléchargements venant d'adresses de centres de don
 - Le recadrage du jeu est centré, il ne suit pas un sujet qui s'écarte du milieu de l'image.
 - La détection de la facecam suppose un visage de face et une incrustation fixe ; un streamer incrusté sans cadre (fond vert) est cadré serré autour du visage.
 - La file d'attente est en mémoire : un redémarrage du serveur interrompt le traitement en cours.
-- Les légendes proposées reprennent le titre de la vidéo.
+- Sans clé `ANTHROPIC_API_KEY`, les shorts n'ont pas de titre et les légendes proposées reprennent le titre de la vidéo.

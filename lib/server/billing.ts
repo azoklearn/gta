@@ -29,7 +29,7 @@ function addMonth(from: Date): Date {
 }
 
 function log(event: string, details: Record<string, unknown>): void {
-  console.log(`[viceclip:paiement] ${event} ${JSON.stringify(details)}`);
+  console.log(`[gtaclip:paiement] ${event} ${JSON.stringify(details)}`);
 }
 
 /**
@@ -58,7 +58,7 @@ export async function startCheckout(user: UserRow, planId: unknown, siteUrl: str
   const payment = await client.payments.create({
     paymentRequest: {
       amount: euros(plan),
-      description: `ViceClip ${plan.name} : premier mois`,
+      description: `GTAClip ${plan.name} : premier mois`,
       redirectUrl: `${siteUrl}/compte?paiement=retour`,
       webhookUrl: webhookUrl(),
       sequenceType: "first",
@@ -182,7 +182,7 @@ async function openSubscription(
   mandateId: string | undefined,
 ): Promise<string | null> {
   const today = new Date();
-  const description = `ViceClip ${plan.name} (depuis le ${today.toISOString().slice(0, 10)}, ${today.getTime().toString(36)})`;
+  const description = `GTAClip ${plan.name} (depuis le ${today.toISOString().slice(0, 10)}, ${today.getTime().toString(36)})`;
   try {
     const subscription = await client.subscriptions.create({
       customerId,

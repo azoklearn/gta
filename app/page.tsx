@@ -5,8 +5,9 @@ import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { Nav } from "@/components/Nav";
+import { Platforms } from "@/components/Platforms";
 import { Pricing } from "@/components/Pricing";
-import { Steps } from "@/components/Steps";
+import { ShortsWall } from "@/components/ShortsWall";
 
 export default function Home() {
   return (
@@ -14,9 +15,10 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
-        <Steps />
-        <Earnings />
+        <ShortsWall />
+        <Platforms />
         <Features />
+        <Earnings />
         <Pricing />
         <Faq />
         <FinalCta />

@@ -12,7 +12,7 @@ export function api(handler: (request: Request) => Promise<Response> | Response)
       return withCors(request, await handler(request));
     } catch (err) {
       if (err instanceof AccountError) return withCors(request, Response.json({ error: err.message }, { status: err.status }));
-      console.error("[viceclip] erreur inattendue", err);
+      console.error("[gtaclip] erreur inattendue", err);
       return withCors(
         request,
         Response.json({ error: "Le serveur a rencontré une erreur. Réessaie dans un instant." }, { status: 500 }),
