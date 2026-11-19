@@ -55,75 +55,171 @@ function useJob(id: string): Load {
   return load;
 }
 
+/** Ce que fait le serveur à chaque étape, pour que l'attente raconte quelque chose. */
+const STEP_NOTES: Record<JobStep, string[]> = {
+  download: ["Connexion à YouTube…", "Téléchargement de la vidéo…", "Récupération des sous-titres…"],
+  analyze: [
+    "Écoute du son, seconde par seconde…",
+    "Repérage des scènes où ça bouge…",
+    "Recherche de la facecam du streamer…",
+    "Classement des meilleurs moments…",
+  ],
+  render: ["Recadrage au format vertical…", "Incrustation du titre et des sous-titres…", "Encodage en 1080 × 1920…"],
+};
+
+/**
+ * Avancement affiché : il rejoint en douceur la vraie valeur et, quand le serveur ne donne pas de
+ * nouvelles, continue d'avancer très lentement sans jamais dépasser la fin de l'étape en cours.
+ */
+function useSmoothProgress(target: number, ceiling: number, moving: boolean): number {
+  const [shown, setShown] = useState(target);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setShown((value) => {
+        if (value < target) return Math.min(target, value + Math.max(0.002, (target - value) * 0.18));
+        return moving ? value + Math.max(0, ceiling - value) * 0.003 : value;
+      });
+    }, 160);
+    return () => clearInterval(timer);
+  }, [target, ceiling, moving]);
+  return Math.max(shown, target);
+}
+
+/** Fait défiler les messages de l'étape en cours. */
+function useRotating(messages: string[]): string {
+  const [turn, setTurn] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setTurn((n) => n + 1), 2600);
+    return () => clearInterval(timer);
+  }, []);
+  return messages[turn % messages.length];
+}
+
 function Progress({ job }: { job: JobState }) {
   const steps: JobStep[] = job.source.kind === "youtube" ? ["download", "analyze", "render"] : ["analyze", "render"];
   const current = steps.indexOf(job.step);
-  const overall = job.status === "queued" ? 0 : (current + job.progress) / steps.length;
+  const queued = job.status === "queued";
+  const real = queued ? 0 : (current + job.progress) / steps.length;
+  const overall = useSmoothProgress(real, queued ? 0 : (current + 1) / steps.length - 0.015, !queued);
+  const note = useRotating(STEP_NOTES[job.step]);
+  const percent = Math.min(99, Math.round(overall * 100));
+  const thumbnail = job.source.videoId ? `https://i.ytimg.com/vi/${job.source.videoId}/hqdefault.jpg` : null;
 
   return (
-    <div className="panel p-6 sm:p-8">
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="display text-2xl">
-          {job.status === "queued" ? "En file d'attente" : "Découpage en cours"}
-        </h2>
-        <span className="display text-2xl tabular-nums text-gradient">{Math.round(overall * 100)} %</span>
-      </div>
-      <div
-        className="mt-4 h-2 rounded-full bg-white/10"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(overall * 100)}
-        aria-label="Avancement du découpage"
-      >
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-pink to-orange transition-[width] duration-500"
-          style={{ width: `${Math.max(2, overall * 100)}%` }}
-        />
-      </div>
-
-      {job.status === "queued" && job.queuePosition > 0 && (
-        <p className="mt-4 text-[15px] text-ink-soft">
-          {job.queuePosition === 1
-            ? "Une vidéo passe avant la tienne."
-            : `${job.queuePosition} vidéos passent avant la tienne.`}
-        </p>
+    <div className="panel overflow-hidden">
+      {thumbnail && (
+        <div className="relative aspect-[16/7] overflow-hidden bg-black">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 scale-105 bg-cover bg-center opacity-70"
+            style={{ backgroundImage: `url(${thumbnail})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+          {/* Faisceau qui balaie l'image, comme une lecture de la vidéo par l'outil */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 w-1/3 animate-[scan_2.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/25 to-transparent"
+          />
+          <span className="absolute top-3 left-3 flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[12px] font-medium text-ink-soft backdrop-blur-md">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-pink opacity-70" />
+              <span className="relative inline-flex size-2 rounded-full bg-pink" />
+            </span>
+            {queued ? "En attente" : "Découpage en direct"}
+          </span>
+        </div>
       )}
 
-      <ol className="mt-6 space-y-3">
-        {steps.map((step, i) => {
-          const done = job.status !== "queued" && i < current;
-          const active = job.status === "running" && i === current;
-          return (
-            <li key={step} className="flex items-center gap-3 text-[15px]">
-              <span
-                className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${
-                  done ? "bg-cash text-black" : active ? "bg-pink/20" : "bg-white/10"
+      <div className="p-6 sm:p-8">
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="display text-2xl">{queued ? "En file d'attente" : STEP_LABELS[job.step]}</h2>
+            <p key={note} className="rise-in mt-1.5 truncate text-[15px] text-muted" aria-live="polite">
+              {queued
+                ? job.queuePosition > 1
+                  ? `${job.queuePosition} vidéos passent avant la tienne.`
+                  : "Une vidéo passe avant la tienne."
+                : job.step === "render" && job.clips.length > 0
+                  ? `Short ${Math.min(job.rendered + 1, job.clips.length)} sur ${job.clips.length} · ${note}`
+                  : note}
+            </p>
+          </div>
+          <span className="display text-gradient shrink-0 text-[2.6rem] leading-none tabular-nums">{percent}&nbsp;%</span>
+        </div>
+
+        <div
+          className="relative mt-5 h-2.5 overflow-hidden rounded-full bg-white/10"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+          aria-label="Avancement du découpage"
+        >
+          <div
+            className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-pink to-orange transition-[width] duration-300 ease-out"
+            style={{ width: `${Math.max(3, overall * 100)}%` }}
+          >
+            <span className="absolute inset-0 animate-[stripes_1s_linear_infinite] bg-[linear-gradient(110deg,transparent_0_35%,rgb(255_255_255/0.35)_50%,transparent_65%_100%)] bg-[length:48px_100%]" />
+          </div>
+        </div>
+
+        <ol className="mt-6 grid gap-2 sm:grid-cols-3">
+          {steps.map((step, i) => {
+            const done = !queued && i < current;
+            const active = job.status === "running" && i === current;
+            return (
+              <li
+                key={step}
+                className={`flex items-center gap-2.5 rounded-[14px] border px-3 py-2.5 text-[13.5px] transition-colors ${
+                  active ? "border-white/20 bg-white/[0.06]" : "border-white/10 bg-transparent"
                 }`}
               >
-                {done ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : active ? (
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-pink" />
-                ) : null}
-              </span>
-              <span className={active ? "font-semibold text-ink" : done ? "text-ink" : "text-muted"}>
-                {STEP_LABELS[step]}
-                {active && step === "render" && job.clips.length > 0 && (
-                  <span className="font-normal text-ink-soft">
-                    {" "}
-                    · {Math.min(job.rendered + 1, job.clips.length)} sur {job.clips.length}
-                  </span>
-                )}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="mt-6 text-sm text-muted">
-        Tu peux laisser cette page ouverte ou y revenir plus tard : le lien reste valable 24 heures.
-      </p>
+                <span
+                  className={`grid size-6 shrink-0 place-items-center rounded-full ${
+                    done ? "bg-cash text-black" : active ? "" : "bg-white/10 text-muted"
+                  }`}
+                >
+                  {done ? (
+                    <Check className="size-3.5" />
+                  ) : active ? (
+                    <span className="size-5 animate-spin rounded-full border-2 border-white/20 border-t-pink" />
+                  ) : (
+                    <span className="text-[11px] font-semibold tabular-nums">{i + 1}</span>
+                  )}
+                </span>
+                <span className={active ? "font-semibold text-ink" : done ? "text-ink-soft" : "text-muted"}>
+                  {STEP_LABELS[step]}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+
+        <p className="mt-5 text-[13px] text-muted">
+          Tu peux laisser cette page ouverte ou y revenir plus tard : le lien reste valable 24 heures.
+        </p>
+      </div>
     </div>
+  );
+}
+
+/** Emplacement d'un short pas encore rendu. */
+function ShortPlaceholder({ index, active }: { index: number; active: boolean }) {
+  return (
+    <li className="panel flex w-[9.5rem] flex-col overflow-hidden p-2 sm:w-[11rem]" aria-hidden="true">
+      <div className="relative aspect-[9/16] overflow-hidden rounded-[14px] bg-white/[0.04]">
+        <div className="absolute inset-0 animate-[shimmer_1.6s_linear_infinite] bg-[linear-gradient(100deg,transparent_20%,rgb(255_255_255/0.07)_50%,transparent_80%)] bg-[length:200%_100%]" />
+        <div className="absolute inset-x-0 top-0 h-1/3 border-b border-white/[0.06] bg-white/[0.03]" />
+        <span className="absolute inset-0 grid place-items-center">
+          {active ? (
+            <span className="size-8 animate-spin rounded-full border-2 border-white/15 border-t-pink" />
+          ) : (
+            <span className="display text-3xl text-white/15">{index}</span>
+          )}
+        </span>
+      </div>
+      <p className="px-1 pt-2 pb-1 text-[12.5px] text-muted">{active ? "Rendu en cours…" : `Short ${index}`}</p>
+    </li>
   );
 }
 
@@ -332,6 +428,9 @@ export function ProjectView({ id }: { id: string }) {
 function Results({ job }: { job: JobState }) {
   const ready = job.clips.filter((c) => c.index <= job.rendered);
   const done = job.status === "done";
+  // Nombre de shorts attendus : connu après l'analyse, sinon celui que l'offre a réservé.
+  const expected = job.clips.length || job.reserved || 3;
+  const untitled = job.source.title === "Vidéo YouTube";
 
   return (
     <>
@@ -341,7 +440,13 @@ function Results({ job }: { job: JobState }) {
           {job.source.duration ? ` · ${clock(job.source.duration)}` : ""}
         </p>
         <h1 className="display mt-2 text-balance text-[clamp(1.9rem,5vw,2.9rem)] leading-[1.08]">
-          {done ? (ready.length > 1 ? `Tes ${ready.length} shorts sont prêts` : "Ton short est prêt") : job.source.title}
+          {done
+            ? ready.length > 1
+              ? `Tes ${ready.length} shorts sont prêts`
+              : "Ton short est prêt"
+            : untitled
+              ? "On prépare tes shorts"
+              : job.source.title}
         </h1>
         {done && <p className="mt-3 text-[17px] text-ink-soft">{job.source.title}</p>}
         {job.layout === "facecam" && (
@@ -352,9 +457,21 @@ function Results({ job }: { job: JobState }) {
       </div>
 
       {!done && (
-        <div className="mx-auto mt-8 max-w-xl">
+        <div className="mx-auto mt-8 max-w-2xl">
           <Progress job={job} />
         </div>
+      )}
+
+      {!done && (
+        <ul className="mt-6 flex flex-wrap justify-center gap-3 sm:gap-4">
+          {Array.from({ length: Math.max(0, expected - ready.length) }, (_, i) => (
+            <ShortPlaceholder
+              key={i}
+              index={ready.length + i + 1}
+              active={job.status === "running" && job.step === "render" && i === 0}
+            />
+          ))}
+        </ul>
       )}
 
       {ready.length > 0 && (
