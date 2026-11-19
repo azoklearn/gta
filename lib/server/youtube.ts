@@ -89,7 +89,8 @@ async function cookies(): Promise<string | null> {
 async function baseArgs(): Promise<string[]> {
   const args = ["--no-playlist", "--no-warnings", "--js-runtimes", "node"];
   const file = await cookies();
-  if (file) args.push("--cookies", file);
+  // Avec un compte connecté, les requêtes sont espacées : un compte trop sollicité voit sa session annulée.
+  if (file) args.push("--cookies", file, "--sleep-requests", "1");
   if (config.ytdlpProxy) args.push("--proxy", config.ytdlpProxy);
   return args;
 }
@@ -129,7 +130,8 @@ async function withRetries<T>(task: () => Promise<T>): Promise<T> {
       return await task();
     } catch (err) {
       const retryable = err instanceof CommandError && /not a bot|Sign in to confirm|HTTP Error 429/i.test(err.stderr);
-      if (!retryable || attempt >= ATTEMPTS) {
+      // Avec un compte connecté, insister ne sert à rien et expose le compte : une seule tentative.
+      if (!retryable || attempt >= (youtubeAccountReady() ? 1 : ATTEMPTS)) {
         if (retryable) console.error(`[gtaclip] cookies YouTube — ${await cookiesReport()}`);
         throw explain(err);
       }
