@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { call, refreshAccount, signOut, useAccount } from "@/lib/account";
+import { call, pendingUrl, refreshAccount, resumePendingUrl, signOut, useAccount } from "@/lib/account";
 import { type Account, findPlan, FREE_TRIAL } from "@/lib/plans";
 import { ButtonLink } from "./Button";
 
@@ -53,6 +53,8 @@ export function AccountView() {
     window.sessionStorage.removeItem("viceclip.message");
     return message;
   });
+  const [waiting, setWaiting] = useState(() => (typeof window === "undefined" ? false : Boolean(pendingUrl())));
+  const [launching, setLaunching] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,20 @@ export function AccountView() {
 
   const plan = findPlan(account.plan);
   const until = account.periodEnd ? dateFormat.format(new Date(account.periodEnd)) : null;
+
+  /** Reprend le lien collé avant l'inscription ou le paiement. */
+  async function resume() {
+    setLaunching(true);
+    setError(null);
+    const job = await resumePendingUrl();
+    if (job.id) {
+      router.push(`/projets/${job.id}`);
+      return;
+    }
+    setError(job.error ?? "Le découpage n'a pas pu être lancé.");
+    setWaiting(false);
+    setLaunching(false);
+  }
 
   async function cancel() {
     setBusy(true);
@@ -98,6 +114,19 @@ export function AccountView() {
         </Banner>
       )}
       {notice && <Banner tone="warn">{notice}</Banner>}
+      {waiting && account.credits > 0 && (
+        <Banner tone="good">
+          Ta vidéo t&apos;attend : le lien que tu avais collé est prêt à être découpé.{" "}
+          <button
+            type="button"
+            onClick={resume}
+            disabled={launching}
+            className="font-semibold text-white underline decoration-white/40 underline-offset-4 disabled:opacity-60"
+          >
+            {launching ? "Lancement…" : "Lancer le découpage"}
+          </button>
+        </Banner>
+      )}
       {account.paymentFailed && (
         <Banner tone="warn">
           Ton dernier prélèvement a échoué. Mollie va réessayer automatiquement ; vérifie ton moyen de paiement pour ne pas
@@ -109,7 +138,7 @@ export function AccountView() {
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <p className="text-sm text-muted">Offre</p>
-            <p className="display mt-1 text-3xl">{plan ? plan.name : "Essai gratuit"}</p>
+            <p className="display mt-1 text-3xl">{plan ? plan.name : FREE_TRIAL.shorts > 0 ? "Essai gratuit" : "Aucune offre"}</p>
             <p className="mt-2 text-[15px] text-ink-soft">
               {plan && account.gifted
                 ? `Accès offert, sans paiement. Tes shorts sont remis à neuf le ${until}.`
@@ -117,7 +146,9 @@ export function AccountView() {
                 ? account.subscription === "canceled"
                   ? `Résiliée : elle reste active jusqu'au ${until}, puis s'arrête sans nouveau prélèvement.`
                   : `${plan.price} € par mois, prochain prélèvement le ${until}.`
-                : `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`}
+                : FREE_TRIAL.shorts > 0
+                  ? `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`
+                  : "Choisis une offre pour découper tes premières vidéos."}
             </p>
           </div>
           <div className="sm:text-right">
@@ -128,10 +159,18 @@ export function AccountView() {
         </div>
 
         <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6">
-          <ButtonLink href="/#top">Découper une vidéo</ButtonLink>
-          <ButtonLink href="/#tarifs" variant="ghost" arrow={false}>
-            {plan ? "Changer d'offre" : "Voir les offres"}
-          </ButtonLink>
+          {account.credits > 0 ? (
+            <>
+              <ButtonLink href="/#top">Découper une vidéo</ButtonLink>
+              <ButtonLink href="/#tarifs" variant="ghost" arrow={false}>
+                {plan ? "Changer d'offre" : "Voir les offres"}
+              </ButtonLink>
+            </>
+          ) : (
+            <ButtonLink href="/#tarifs" shine>
+              {plan ? "Passer à l'offre supérieure" : "Choisir une offre"}
+            </ButtonLink>
+          )}
         </div>
       </section>
 

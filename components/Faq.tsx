@@ -32,7 +32,7 @@ const QUESTIONS = [
   },
   {
     q: "Comment fonctionne l'abonnement ?",
-    a: "Tu commences avec 3 shorts offerts, sans carte bancaire. Ensuite tu choisis une offre mensuelle : ton compteur de shorts est remis à neuf à chaque prélèvement, les shorts non utilisés ne sont pas reportés. Le paiement passe par Mollie et tu peux résilier à tout moment depuis ton compte ; l'offre reste alors active jusqu'à la fin du mois payé.",
+    a: "Tu crées ton compte, puis tu choisis une offre mensuelle : ton compteur de shorts est remis à neuf à chaque prélèvement, les shorts non utilisés ne sont pas reportés. Le paiement passe par Mollie et tu peux résilier à tout moment depuis ton compte ; l'offre reste alors active jusqu'à la fin du mois payé.",
   },
   {
     q: "Les revenus affichés sont-ils garantis ?",

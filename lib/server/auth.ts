@@ -49,7 +49,7 @@ function readCredentials(body: unknown): { email: string; password: string } {
   return { email, password };
 }
 
-/** Crée un compte, avec les shorts d'essai offerts, et ouvre une session. */
+/** Crée un compte et ouvre une session. */
 export function signUp(body: unknown): { token: string; user: UserRow } {
   const { email, password } = readCredentials(body);
   if (password.length < 8) throw new AccountError("Choisis un mot de passe d'au moins 8 caractères.");

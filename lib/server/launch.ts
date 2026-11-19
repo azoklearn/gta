@@ -15,7 +15,7 @@ export async function launchJob(user: UserRow, source: Job["source"], id?: strin
     throw new AccountError(
       user.plan
         ? "Tu as utilisé tous les shorts de ton offre ce mois-ci. Passe à l'offre supérieure pour continuer."
-        : "Tes shorts offerts sont épuisés. Choisis une offre pour continuer.",
+        : "Choisis une offre pour lancer ton découpage.",
       402,
     );
   }

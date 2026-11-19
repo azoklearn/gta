@@ -29,7 +29,7 @@ Le site est servi sur http://localhost:3000.
 
 ## Comptes et abonnements
 
-Un découpage demande un compte (adresse e-mail et mot de passe). Chaque compte reçoit 3 shorts d'essai, puis l'utilisateur choisit une offre mensuelle, définie dans `lib/plans.ts` :
+Un découpage demande un compte (adresse e-mail et mot de passe). Il n'y a pas d'essai gratuit : l'utilisateur choisit une offre mensuelle, définie dans `lib/plans.ts` (la constante `FREE_TRIAL.shorts` permet de rétablir des shorts offerts à l'inscription) :
 
 | Offre | Prix | Shorts par mois | Shorts par vidéo | Durée max. d'une vidéo |
 | --- | --- | --- | --- | --- |

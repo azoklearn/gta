@@ -150,6 +150,21 @@ function take(key: string): string | null {
 export const rememberUrl = (url: string) => stash(PENDING_URL, url);
 export const rememberPlan = (plan: PlanId) => stash(PENDING_PLAN, plan);
 
+/** Lien collé avant l'inscription ou le paiement, encore en attente de découpage. */
+export function pendingUrl(): string | null {
+  try {
+    return window.sessionStorage.getItem(PENDING_URL);
+  } catch {
+    return null;
+  }
+}
+
+/** Lance le découpage du lien en attente. */
+export async function resumePendingUrl(): Promise<{ id?: string; error?: string }> {
+  const url = take(PENDING_URL);
+  return url ? startJob(url) : { error: "Aucune vidéo en attente." };
+}
+
 /** Lance le découpage d'une vidéo. Renvoie l'identifiant du projet, ou un message d'erreur. */
 export async function startJob(url: string): Promise<{ id?: string; error?: string; status: number }> {
   const reply = await call<{ id?: string }>("/api/jobs", { url });
@@ -217,7 +232,13 @@ export async function resumeAfterAuth(): Promise<{ goTo?: string; error?: string
   const url = take(PENDING_URL);
   if (url) {
     const job = await startJob(url);
-    return job.id ? { goTo: `/projets/${job.id}` } : { goTo: "/compte", error: job.error };
+    if (job.id) return { goTo: `/projets/${job.id}` };
+    // Sans offre, le lien est gardé de côté : il sera repris une fois l'abonnement payé.
+    if (job.status === 402) {
+      rememberUrl(url);
+      return { goTo: "/#tarifs" };
+    }
+    return { goTo: "/compte", error: job.error };
   }
   return { goTo: "/compte" };
 }

@@ -40,7 +40,9 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       <h1 className="display text-[2rem] leading-none">{signup ? "Crée ton compte" : "Content de te revoir"}</h1>
       <p className="mt-2 leading-relaxed text-ink-soft">
         {signup
-          ? `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`
+          ? FREE_TRIAL.shorts > 0
+            ? `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`
+            : "Une minute pour créer ton compte, puis tu choisis ton offre."
           : "Connecte-toi pour retrouver tes shorts et ton offre."}
       </p>
 

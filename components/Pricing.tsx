@@ -1,4 +1,4 @@
-import { FREE_TRIAL, PLANS, type Plan } from "@/lib/plans";
+import { PLANS, type Plan } from "@/lib/plans";
 import { Check } from "./Icons";
 import { PlanButton } from "./PlanButton";
 import { SectionHeading } from "./Section";
@@ -32,8 +32,7 @@ export function Pricing() {
           </>
         }
       >
-        {FREE_TRIAL.shorts} shorts offerts à l&apos;inscription, sans carte bancaire. Ensuite, un abonnement mensuel sans
-        engagement, résiliable en un clic.
+        Un abonnement mensuel sans engagement, résiliable en un clic. Tes shorts sont remis à neuf chaque mois.
       </SectionHeading>
 
       <div className="mx-auto mt-10 grid max-w-5xl items-stretch gap-4 sm:mt-14 lg:grid-cols-3">

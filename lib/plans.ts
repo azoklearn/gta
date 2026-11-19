@@ -23,8 +23,11 @@ export const PLANS: Plan[] = [
   { id: "pro", name: "Pro", price: 49, shortsPerMonth: 200, shortsPerVideo: 8, maxMinutes: 90, priority: 3 },
 ];
 
-/** Essai offert à la création du compte, sans carte bancaire. */
-export const FREE_TRIAL = { shorts: 3, shortsPerVideo: 3, maxMinutes: 30, priority: 0 };
+/**
+ * Ce qu'un compte sans offre peut faire. Aucun short n'est offert à l'inscription : il faut choisir une
+ * offre pour découper. Mettre `shorts` au-dessus de zéro rétablit un essai gratuit.
+ */
+export const FREE_TRIAL = { shorts: 0, shortsPerVideo: 3, maxMinutes: 30, priority: 0 };
 
 export function findPlan(id: unknown): Plan | undefined {
   return PLANS.find((plan) => plan.id === id);

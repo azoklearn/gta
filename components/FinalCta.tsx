@@ -14,7 +14,7 @@ export function FinalCta() {
           className="-z-20 object-cover object-[50%_40%]"
         />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,10,0.82),rgba(10,10,10,0.6)_45%,rgba(10,10,10,0.9))]" />
-        <Eyebrow className="bg-black/40 backdrop-blur-md">3 shorts offerts à l&apos;inscription</Eyebrow>
+        <Eyebrow className="bg-black/40 backdrop-blur-md">Sans engagement, résiliable en un clic</Eyebrow>
         <h2 className="display max-w-2xl text-[clamp(2.1rem,6vw,3.6rem)] leading-none text-balance text-white">
           Pendant qu&apos;ils jouent, <span className="text-gradient">tes shorts se préparent</span>.
         </h2>
