@@ -48,7 +48,7 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
         <label htmlFor={id} className="sr-only">
           Lien de la vidéo YouTube
         </label>
-        <div className="flex min-w-0 flex-1 items-center gap-3 pr-1 pl-4 sm:pl-5">
+        <div className="flex min-w-0 flex-1 items-center gap-3 pr-1 pl-4 max-[359px]:pl-3 sm:pl-5">
           <LinkIcon className="hidden size-5 shrink-0 text-muted sm:block" />
           <input
             id={id}
@@ -71,7 +71,7 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
         <button
           type="submit"
           disabled={busy}
-          className="button-shine inline-flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 text-[16px] font-semibold tracking-[-0.005em] whitespace-nowrap text-black transition-[transform,background-color] duration-150 hover:bg-white/90 focus-visible:ring-4 focus-visible:ring-white/30 active:translate-y-px disabled:opacity-70 sm:h-[3.25rem] sm:px-7 sm:text-[17px]"
+          className="button-shine inline-flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 text-[16px] font-semibold tracking-[-0.005em] whitespace-nowrap text-black transition-[transform,background-color] duration-150 hover:bg-white/90 focus-visible:ring-4 focus-visible:ring-white/30 active:translate-y-px disabled:opacity-70 max-[359px]:px-4 max-[359px]:[&_svg]:hidden sm:h-[3.25rem] sm:px-7 sm:text-[17px]"
         >
           {busy ? "Lancement…" : "Découper"}
           <ArrowRight className="size-4" />

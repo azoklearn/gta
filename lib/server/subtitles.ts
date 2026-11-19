@@ -77,7 +77,7 @@ export interface TitleBanner {
   top: number;
 }
 
-const TITLE_LINE = 23;
+const TITLE_LINE = 26;
 const TITLE_MAX_LINES = 3;
 
 /** Répartit un titre sur des lignes de longueur voisine, pour un bandeau équilibré. */
@@ -158,7 +158,7 @@ export function buildAss(
       "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
       "Style: Caption,Montserrat ExtraBold,108,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,0,0,0,0,100,100,0,0,1,9,4,2,50,50,470,1",
       // Bandeau du titre : texte noir sur un cartouche blanc par ligne, ancré en haut.
-      "Style: Title,Montserrat ExtraBold,58,&H00101010,&H00101010,&H00FFFFFF,&H00FFFFFF,0,0,0,0,100,100,0,0,3,14,0,8,60,60,60,1",
+      "Style: Title,Montserrat ExtraBold,68,&H00101010,&H00101010,&H00FFFFFF,&H00FFFFFF,0,0,0,0,100,100,0,0,3,16,0,8,50,50,60,1",
       "",
       "[Events]",
       "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",

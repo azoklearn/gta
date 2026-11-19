@@ -112,10 +112,10 @@ export function Hero() {
             </div>
 
             <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 flex justify-between lg:hidden">
-              <div className="rise-in origin-top-left -rotate-3 scale-90 [--i:4]">
+              <div className="rise-in origin-top-left -rotate-3 scale-90 [--i:4] max-[359px]:scale-[0.76]">
                 <MiniNotice value="350 000" caption="vues · exemple" />
               </div>
-              <div className="rise-in origin-top-right rotate-3 scale-90 [--i:5]">
+              <div className="rise-in origin-top-right rotate-3 scale-90 [--i:5] max-[359px]:scale-[0.76]">
                 <MiniNotice value="+689 €" caption="paiement reçu · exemple" tone="cash" />
               </div>
             </div>

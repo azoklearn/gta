@@ -32,7 +32,7 @@ const Answer = z.object({
 });
 
 const FRAMES_PER_SHORT = 3;
-const MAX_TITLE = 64;
+const MAX_TITLE = 78;
 
 const INSTRUCTIONS = `Tu écris les titres de shorts verticaux (TikTok, Reels, YouTube Shorts) découpés dans la vidéo d'un streamer ou d'un youtubeur qui joue à GTA 6.
 
