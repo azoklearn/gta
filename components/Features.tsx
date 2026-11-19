@@ -29,7 +29,6 @@ const SCORE = [
   ["Accroche", 94],
   ["Action", 88],
   ["Rythme", 76],
-  ["Chute", 91],
 ] as const;
 
 export function Features() {
@@ -43,8 +42,8 @@ export function Features() {
         {/* Recadrage */}
         <Card
           className="lg:col-span-2"
-          title="Un recadrage 9:16 qui suit l'action"
-          text="Le cadre reste sur le personnage ou le véhicule, même en pleine poursuite. Plus de sujet coupé au bord de l'écran."
+          title="Un recadrage 9:16 automatique"
+          text="Le cadre se place au centre de l'image, là où se trouve ton personnage dans GTA. Rien à régler, l'export sort en 1080 × 1920."
         >
           <div className="relative overflow-hidden rounded-2xl">
             <Image
@@ -72,7 +71,7 @@ export function Features() {
         {/* Score Wanted */}
         <Card
           title="Le score Wanted"
-          text="Chaque short reçoit de 1 à 5 étoiles selon son potentiel viral. Publie les 5 étoiles en premier."
+          text="Chaque short reçoit de 1 à 5 étoiles, calculées à partir du son et de l'image. Publie les mieux notés en premier."
         >
           <div className="rounded-2xl border border-black/5 bg-paper p-5">
             <div className="flex items-center justify-between">
@@ -93,7 +92,7 @@ export function Features() {
               ))}
             </dl>
             <p className="mt-5 border-t border-black/[0.07] pt-4 text-[13px] text-body">
-              Potentiel viral <span className="font-semibold text-ink">très élevé</span> : à publier en premier.
+              Note globale <span className="font-semibold text-ink">94 sur 100</span> : à publier en premier.
             </p>
           </div>
         </Card>
@@ -105,7 +104,7 @@ export function Features() {
         <Card
           className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
           title="Des sous-titres animés"
-          text="Transcription automatique, mots-clés mis en couleur, styles pensés pour le gaming."
+          text="Les sous-titres de la vidéo YouTube sont repris et incrustés. Le mot prononcé passe en couleur."
         >
           <div className="relative overflow-hidden rounded-2xl">
             <Image
@@ -128,12 +127,12 @@ export function Features() {
         {/* Titres et hashtags */}
         <Card
           className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto"
-          title="Titres et hashtags"
-          text="Une accroche et des hashtags GTA 6 proposés pour chaque short, prêts à copier."
+          title="Légende et hashtags"
+          text="Une légende et des hashtags GTA 6 pour chaque short, prêts à copier."
         >
           <div className="rounded-2xl border border-black/5 bg-paper p-5">
-            <p className="text-[13px] text-muted">Titre proposé</p>
-            <p className="mt-1 font-semibold leading-snug text-ink">Il sème cinq étoiles en 40 secondes</p>
+            <p className="text-[13px] text-muted">Légende proposée</p>
+            <p className="mt-1 font-semibold leading-snug text-ink">24 minutes de chaos à Vice City (partie 1)</p>
             <ul className="mt-4 flex flex-wrap gap-1.5">
               {["#gta6", "#gtavi", "#vicecity", "#gaming", "#clips"].map((t) => (
                 <li key={t} className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[13px] text-body">

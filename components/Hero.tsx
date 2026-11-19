@@ -59,7 +59,6 @@ export function Hero() {
           <div className="mt-6 sm:mt-9">
             <UrlForm />
           </div>
-          <p className="mt-3 text-[13px] text-muted sm:mt-4 sm:text-sm">3 shorts offerts · Sans carte bancaire</p>
         </div>
 
         <div className="mx-auto mt-8 max-w-5xl sm:mt-16">

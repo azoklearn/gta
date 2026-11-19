@@ -18,7 +18,7 @@ export function FinalCta() {
           La hype GTA&nbsp;6 n&apos;attend pas. Tes shorts non plus.
         </h2>
         <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
-          Colle ton premier lien et récupère 3 shorts offerts, prêts à poster.
+          Colle ton premier lien et récupère 3 shorts prêts à poster, sans inscription.
         </p>
         <ButtonLink href="#top" variant="light" className="mt-8 max-sm:w-full max-sm:justify-between">
           Découper ma première vidéo

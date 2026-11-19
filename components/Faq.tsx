@@ -7,15 +7,19 @@ const QUESTIONS = [
   },
   {
     q: "Combien de temps prend le découpage ?",
-    a: "Quelques minutes pour une vidéo standard. Tu reçois une série de shorts classés par score Wanted, à télécharger un par un ou tous ensemble.",
+    a: "Quelques minutes pour une vidéo standard. Tu reçois trois shorts classés par score Wanted, à regarder dans la page puis à télécharger. Ils restent disponibles 24 heures.",
   },
   {
     q: "Quelles vidéos puis-je utiliser ?",
-    a: "Tes propres gameplays, ou des vidéos dont l'auteur t'a donné l'accord. TikTok ne rémunère que le contenu original : ajoute ta voix, ton commentaire ou ton montage pour mettre toutes les chances de ton côté.",
+    a: "Tes propres gameplays, ou des vidéos dont l'auteur t'a donné l'accord. Tu peux coller un lien YouTube ou importer directement un fichier vidéo. TikTok ne rémunère que le contenu original : ajoute ta voix, ton commentaire ou ton montage pour mettre toutes les chances de ton côté.",
   },
   {
     q: "Est-ce que ça marche pour d'autres jeux ?",
-    a: "La détection est entraînée sur les situations typiques de GTA : poursuites, fusillades, braquages, cascades. Elle fonctionne aussi sur GTA V et GTA Online.",
+    a: "Oui. La détection s'appuie sur le son et l'image : coups de feu, explosions, cris, changements de plan rapides. Elle est réglée pour GTA mais fonctionne sur n'importe quel gameplay.",
+  },
+  {
+    q: "Mes shorts auront-ils des sous-titres ?",
+    a: "Oui quand la vidéo YouTube en propose, y compris les sous-titres générés automatiquement. Pour un fichier importé, les shorts sortent pour l'instant sans sous-titres.",
   },
   {
     q: "Les revenus affichés sont-ils garantis ?",
