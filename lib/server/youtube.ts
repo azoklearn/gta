@@ -94,9 +94,9 @@ function explain(err: unknown): Error {
   const text = err.stderr;
   if (/introuvable sur le serveur/.test(text)) return new UserError("yt-dlp n'est pas installé sur le serveur.");
   if (/not a bot|Sign in to confirm|HTTP Error 429|This content isn.t available, try again later/i.test(text)) {
-    if (youtubeAccountReady()) {
-      console.error("[gtaclip] YouTube refuse la vidéo malgré le compte connecté : ses cookies ont peut-être expiré.");
-    }
+    // Le message exact de YouTube dit si le compte est en cause (cookies refusés) ou si c'est une limite de débit.
+    const reason = text.split("\n").filter((l) => l.startsWith("ERROR")).pop() ?? text.trim().split("\n").pop() ?? "";
+    console.error(`[gtaclip] YouTube refuse la vidéo (compte connecté : ${youtubeAccountReady() ? "oui" : "non"}) : ${reason.slice(0, 400)}`);
     return new YouTubeBlocked(
       "YouTube refuse pour l'instant de fournir ses vidéos à notre serveur (protection anti-robot). Aucun short n'a été décompté de ton offre.",
     );
