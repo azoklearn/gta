@@ -116,7 +116,7 @@ Pour que le serveur s'identifie auprès de YouTube, connecte-lui un compte dédi
 2. Colle le contenu du fichier dans la variable `YTDLP_COOKIES_TEXT` du serveur de découpage, puis redéploie.
 3. `/api/health` doit répondre `"youtubeAccount": true`.
 
-Le serveur garde ces cookies sur son disque persistant et les laisse se renouveler ; ils finissent quand même par expirer, il faut alors recommencer l'export. Les journaux signalent un refus de YouTube « malgré le compte connecté ».
+Le serveur repart du contenu de la variable à chaque téléchargement. Les cookies finissent par expirer, il faut alors recommencer l'export et remplacer la variable. Les journaux signalent un refus de YouTube « malgré le compte connecté ».
 
 ## Limites connues
 

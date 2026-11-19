@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config";
@@ -46,7 +45,7 @@ function signedIn(text: string): boolean {
 
 /**
  * Décrit l'état des cookies sans en montrer la valeur, pour comprendre un refus de YouTube :
- * session présente ou non dans le réglage, et dans le fichier que yt-dlp tient à jour.
+ * session présente ou non dans le réglage, et dans le fichier tel que yt-dlp l'a laissé.
  */
 async function cookiesReport(): Promise<string> {
   if (config.ytdlpCookies) return "fichier fourni par YTDLP_COOKIES";
@@ -54,48 +53,37 @@ async function cookiesReport(): Promise<string> {
   if (!setting) return "aucun cookie";
   const file = await fs.readFile(path.join(config.dbDir, "youtube-cookies.txt"), "utf8").catch(() => "");
   const say = (ok: boolean) => (ok ? "session présente" : "PAS de session");
-  return `réglage : ${say(signedIn(setting))} ; fichier du serveur : ${say(signedIn(file))}`;
+  return `réglage : ${say(signedIn(setting))} ; après l'appel à YouTube : ${say(signedIn(file))}`;
 }
 
-let cookiesFile: Promise<string | null> | null = null;
+let warned = false;
 
 /**
  * Chemin du fichier de cookies transmis à yt-dlp, ou `null` s'il n'y en a pas.
  *
- * Le contenu donné par `YTDLP_COOKIES_TEXT` est écrit sur le disque persistant. yt-dlp met ce fichier
- * à jour quand YouTube renouvelle la session : il n'est donc réécrit que si le réglage a changé, pour
- * ne pas remplacer une session à jour par celle, plus ancienne, du réglage.
+ * Le contenu de `YTDLP_COOKIES_TEXT` fait foi : il est recopié avant chaque appel. yt-dlp réécrit le
+ * fichier qu'on lui donne, et une réponse de YouTube peut en retirer la session ; repartir du réglage
+ * évite qu'un seul refus déconnecte le serveur pour de bon.
  */
-function cookies(): Promise<string | null> {
-  cookiesFile ??= (async () => {
-    if (config.ytdlpCookies) return config.ytdlpCookies;
-    const text = cookiesText();
-    if (!text) {
-      if (config.ytdlpCookiesText.trim()) {
-        console.error("[gtaclip] YTDLP_COOKIES_TEXT n'est pas un fichier de cookies au format Netscape : il est ignoré.");
-      }
-      return null;
+async function cookies(): Promise<string | null> {
+  if (config.ytdlpCookies) return config.ytdlpCookies;
+  const text = cookiesText();
+  if (!text) {
+    if (config.ytdlpCookiesText.trim() && !warned) {
+      warned = true;
+      console.error("[gtaclip] YTDLP_COOKIES_TEXT n'est pas un fichier de cookies au format Netscape : il est ignoré.");
     }
-    const file = path.join(config.dbDir, "youtube-cookies.txt");
-    const mark = `${file}.empreinte`;
-    const print = createHash("sha256").update(text).digest("hex");
-    const known = await fs.readFile(mark, "utf8").catch(() => "");
-    const present = await fs.stat(file).then(
-      () => true,
-      () => false,
-    );
-    if (known !== print || !present) {
-      await fs.mkdir(config.dbDir, { recursive: true });
-      await fs.writeFile(file, `${text}\n`, { mode: 0o600 });
-      await fs.writeFile(mark, print, { mode: 0o600 });
-    }
-    return file;
-  })().catch((err) => {
-    console.error("[gtaclip] le fichier de cookies YouTube n'a pas pu être préparé", err);
-    cookiesFile = null;
     return null;
-  });
-  return cookiesFile;
+  }
+  try {
+    const file = path.join(config.dbDir, "youtube-cookies.txt");
+    await fs.mkdir(config.dbDir, { recursive: true });
+    await fs.writeFile(file, `${text}\n`, { mode: 0o600 });
+    return file;
+  } catch (err) {
+    console.error("[gtaclip] le fichier de cookies YouTube n'a pas pu être préparé", err);
+    return null;
+  }
 }
 
 async function baseArgs(): Promise<string[]> {
