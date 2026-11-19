@@ -13,8 +13,8 @@ COPY . .
 RUN npm run build
 
 ENV NODE_ENV=production
-# Les vidéos en cours et les shorts sont écrits ici : monte un volume pour les conserver.
+# Les vidéos en cours et les shorts sont écrits ici. Monte un volume sur ce dossier pour les conserver
+# entre deux déploiements (l'instruction VOLUME n'est pas utilisée : certains hébergeurs la refusent).
 ENV VICECLIP_DATA_DIR=/data
-VOLUME /data
 EXPOSE 3000
 CMD ["npm", "run", "start"]
