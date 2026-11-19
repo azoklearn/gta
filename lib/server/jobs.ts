@@ -28,6 +28,11 @@ export function clipPath(id: string, index: number, ext: "mp4" | "jpg"): string 
   return path.join(jobDir(id), `short-${index}.${ext}`);
 }
 
+/** Image tirée de la vidéo d'origine, gardée pour montrer d'où viennent les shorts. */
+export function posterPath(id: string): string {
+  return path.join(jobDir(id), "poster.jpg");
+}
+
 async function writeJob(job: Job): Promise<void> {
   const file = path.join(jobDir(job.id), "job.json");
   const tmp = `${file}.${process.pid}.tmp`;

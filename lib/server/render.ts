@@ -66,3 +66,8 @@ export async function renderClip(
 export async function renderThumbnail(clip: string, output: string, at: number): Promise<void> {
   await run(config.ffmpeg, ["-v", "error", "-y", "-ss", at.toFixed(2), "-i", clip, "-frames:v", "1", "-vf", "scale=540:-2", "-q:v", "4", output]);
 }
+
+/** Extrait une image de la vidéo d'origine, pour montrer d'où viennent les shorts. */
+export async function renderPoster(source: string, output: string, at: number): Promise<void> {
+  await run(config.ffmpeg, ["-v", "error", "-y", "-ss", at.toFixed(2), "-i", source, "-frames:v", "1", "-vf", "scale=1280:-2", "-q:v", "4", output]);
+}

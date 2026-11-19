@@ -3,6 +3,7 @@ import path from "node:path";
 import { billingReady } from "./billing";
 import { config } from "./config";
 import { capture } from "./exec";
+import { titlesReady } from "./titles";
 
 type Check = { at: number; problems: { hosting?: string; ffmpeg?: string; ytdlp?: string } };
 
@@ -74,6 +75,7 @@ export async function serverHealth(): Promise<{
   youtube: boolean;
   facecam: boolean;
   billing: boolean;
+  titles: boolean;
   problems: string[];
 }> {
   const problems = await inspect();
@@ -87,6 +89,8 @@ export async function serverHealth(): Promise<{
     ),
     // Les abonnements demandent une clé Mollie et une adresse publique pour les notifications.
     billing: billingReady(),
+    // Les titres incrustés sont écrits par l'IA : sans clé d'API, les shorts sortent sans titre.
+    titles: titlesReady(),
     problems: Object.values(problems),
   };
 }

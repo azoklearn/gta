@@ -70,16 +70,52 @@ const MAX_PAUSE = 0.7;
 /** Rose de la marque, au format ASS (bleu, vert, rouge). */
 const HIGHLIGHT = "&H8B2EFF&";
 
+/** Titre incrusté en haut du short pendant toute sa durée. */
+export interface TitleBanner {
+  text: string;
+  /** Distance entre le haut de l'image et le bandeau, en pixels (image de 1080 × 1920). */
+  top: number;
+}
+
+const TITLE_LINE = 23;
+const TITLE_MAX_LINES = 3;
+
+/** Répartit un titre sur des lignes de longueur voisine, pour un bandeau équilibré. */
+export function wrapTitle(text: string): string[] {
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const total = tokens.join(" ").length;
+  const count = Math.min(TITLE_MAX_LINES, Math.max(1, Math.ceil(total / TITLE_LINE)));
+  const target = total / count;
+  const lines: string[] = [];
+  let line = "";
+  for (const token of tokens) {
+    const next = line ? `${line} ${token}` : token;
+    const closer = Math.abs(next.length - target) <= Math.abs(line.length - target);
+    if (!line || lines.length === count - 1 || (closer && next.length <= TITLE_LINE + 4)) line = next;
+    else {
+      lines.push(line);
+      line = token;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 /**
- * Construit le fichier de sous-titres d'un short : de courts groupes de mots en capitales,
- * le mot prononcé passant en couleur. Renvoie `null` si personne ne parle dans le passage.
+ * Construit le fichier d'incrustation d'un short : le titre en haut, s'il y en a un, et les
+ * sous-titres en courts groupes de mots en capitales, le mot prononcé passant en couleur.
+ * Renvoie `null` s'il n'y a ni titre ni paroles dans le passage.
  */
-export function buildAss(words: Word[], clipStart: number, clipDuration: number): string | null {
+export function buildAss(
+  words: Word[],
+  clipStart: number,
+  clipDuration: number,
+  title?: TitleBanner | null,
+): { text: string; spoken: boolean } | null {
   const inside = words.filter((w) => w.start >= clipStart && w.start < clipStart + clipDuration);
-  if (inside.length < 3) return null;
 
   const groups: Word[][] = [];
-  for (const word of inside) {
+  for (const word of inside.length >= 3 ? inside : []) {
     const group = groups[groups.length - 1];
     const chars = group ? group.reduce((n, w) => n + w.text.length + 1, 0) + word.text.length : 0;
     const pause = group ? word.start - group[group.length - 1].end : 0;
@@ -101,23 +137,33 @@ export function buildAss(words: Word[], clipStart: number, clipDuration: number)
       lines.push(`Dialogue: 0,${timestamp(from)},${timestamp(to)},Caption,,0,0,0,,${text}`);
     });
   });
+  const spoken = lines.length > 0;
+  if (title?.text) {
+    const banner = wrapTitle(title.text).join("\\N");
+    lines.push(`Dialogue: 1,${timestamp(0)},${timestamp(clipDuration)},Title,,0,0,${Math.round(title.top)},,${banner}`);
+  }
   if (!lines.length) return null;
 
-  return [
-    "[Script Info]",
-    "ScriptType: v4.00+",
-    "PlayResX: 1080",
-    "PlayResY: 1920",
-    "WrapStyle: 2",
-    "ScaledBorderAndShadow: yes",
-    "",
-    "[V4+ Styles]",
-    "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-    "Style: Caption,Montserrat ExtraBold,108,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,0,0,0,0,100,100,0,0,1,9,4,2,50,50,470,1",
-    "",
-    "[Events]",
-    "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
-    ...lines,
-    "",
-  ].join("\n");
+  return {
+    spoken,
+    text: [
+      "[Script Info]",
+      "ScriptType: v4.00+",
+      "PlayResX: 1080",
+      "PlayResY: 1920",
+      "WrapStyle: 2",
+      "ScaledBorderAndShadow: yes",
+      "",
+      "[V4+ Styles]",
+      "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+      "Style: Caption,Montserrat ExtraBold,108,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,0,0,0,0,100,100,0,0,1,9,4,2,50,50,470,1",
+      // Bandeau du titre : texte noir sur un cartouche blanc par ligne, ancré en haut.
+      "Style: Title,Montserrat ExtraBold,58,&H00101010,&H00101010,&H00FFFFFF,&H00FFFFFF,0,0,0,0,100,100,0,0,3,14,0,8,60,60,60,1",
+      "",
+      "[Events]",
+      "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+      ...lines,
+      "",
+    ].join("\n"),
+  };
 }

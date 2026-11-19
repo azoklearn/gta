@@ -24,6 +24,8 @@ export interface Clip {
   stars: number;
   score: ClipScore;
   hasSubtitles: boolean;
+  /** Titre écrit par l'IA et incrusté en haut du short. Absent si aucun titre n'a pu être écrit. */
+  title?: string;
   /** Légende proposée pour la publication. */
   caption: string;
   hashtags: string[];
@@ -39,6 +41,8 @@ export interface Job {
   source: {
     kind: "youtube" | "upload";
     title: string;
+    /** Nom de la chaîne YouTube d'origine. */
+    channel?: string;
     url?: string;
     videoId?: string;
     /** Durée de la vidéo source, en secondes. */

@@ -3,11 +3,12 @@ import path from "node:path";
 import type { Clip } from "@/lib/types";
 import { audioLevels, pickSegments, probe, sceneActivity } from "./analyze";
 import { config } from "./config";
-import { findFacecam } from "./facecam";
+import { FACECAM_HEIGHT, findFacecam } from "./facecam";
 import { renameJob } from "./auth";
-import { clipPath, jobDir, readJob, settleJob, updateJob } from "./jobs";
-import { renderClip, renderThumbnail } from "./render";
+import { clipPath, jobDir, posterPath, readJob, settleJob, updateJob } from "./jobs";
+import { renderClip, renderPoster, renderThumbnail } from "./render";
 import { buildAss, readJson3, type Word } from "./subtitles";
+import { writeCopy } from "./titles";
 import { download, fetchInfo, UserError } from "./youtube";
 
 const HASHTAGS = ["#gta6", "#gtavi", "#vicecity", "#gaming", "#gtaclips"];
@@ -46,7 +47,9 @@ export async function runJob(id: string): Promise<void> {
       const info = await fetchInfo(job.source.url!);
       if (info.isLive) throw new UserError("Les directs en cours ne sont pas pris en charge. Attends la fin du direct.");
       if (info.duration > maxMinutes * 60) throw new UserError(tooLong);
-      job = await updateJob(id, { source: { ...job.source, title: info.title, duration: info.duration } });
+      job = await updateJob(id, {
+        source: { ...job.source, title: info.title, channel: info.channel || undefined, duration: info.duration },
+      });
       renameJob(id, info.title);
       source = (await download(job.source.url!, dir, info.subtitleLang, progress)).video;
     } else {
@@ -74,24 +77,36 @@ export async function runJob(id: string): Promise<void> {
     const segments = pickSegments(levels, activity, job.reserved ?? config.shortsPerJob, config.clipSeconds);
     if (!segments.length) throw new UserError("Aucun passage exploitable n'a été trouvé dans cette vidéo.");
 
-    const clips: Clip[] = segments.map((segment, i) => ({
-      index: i + 1,
-      start: segment.start,
-      duration: segment.duration,
-      stars: segment.stars,
-      score: segment.score,
-      hasSubtitles: false,
-      caption: segments.length > 1 ? `${job!.source.title} (partie ${i + 1})` : job!.source.title,
-      hashtags: HASHTAGS,
-    }));
+    const passages = segments.map((segment, i) => ({ index: i + 1, start: segment.start, duration: segment.duration }));
+    await renderPoster(source, posterPath(id), segments[0].start + Math.min(2, segments[0].duration / 2)).catch(() => {});
+    const copy = await writeCopy(source, dir, job.source, passages, words);
+    progress(1);
+
+    const clips: Clip[] = segments.map((segment, i) => {
+      const written = copy.get(i + 1);
+      return {
+        index: i + 1,
+        start: segment.start,
+        duration: segment.duration,
+        stars: segment.stars,
+        score: segment.score,
+        hasSubtitles: false,
+        title: written?.title,
+        caption:
+          written?.caption || (segments.length > 1 ? `${job!.source.title} (partie ${i + 1})` : job!.source.title),
+        hashtags: written?.hashtags.length ? written.hashtags : HASHTAGS,
+      };
+    });
     await updateJob(id, { step: "render", progress: 0, rendered: 0, clips, layout: facecam ? "facecam" : "full" });
 
     for (const clip of clips) {
       const output = clipPath(id, clip.index, "mp4");
-      const ass = buildAss(words, clip.start, clip.duration);
+      // Le titre se place juste sous la facecam, ou sous les boutons de l'application en plein écran.
+      const banner = clip.title ? { text: clip.title, top: facecam ? FACECAM_HEIGHT + 34 : 250 } : null;
+      const ass = buildAss(words, clip.start, clip.duration, banner);
       const assFile = path.join(dir, `short-${clip.index}.ass`);
-      if (ass) await fs.writeFile(assFile, ass);
-      clip.hasSubtitles = Boolean(ass);
+      if (ass) await fs.writeFile(assFile, ass.text);
+      clip.hasSubtitles = Boolean(ass?.spoken);
       await renderClip(source, output, {
         start: clip.start,
         duration: clip.duration,
@@ -109,7 +124,7 @@ export async function runJob(id: string): Promise<void> {
   } catch (err) {
     const message =
       err instanceof UserError ? err.message : "Le traitement a échoué de façon inattendue. Réessaie avec une autre vidéo.";
-    if (!(err instanceof UserError)) console.error(`[viceclip] ${id}`, err);
+    if (!(err instanceof UserError)) console.error(`[gtaclip] ${id}`, err);
     await updateJob(id, { status: "error", error: message })
       .then(settleJob)
       .catch(() => {});

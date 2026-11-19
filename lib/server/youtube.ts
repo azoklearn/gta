@@ -6,6 +6,7 @@ import { capture, CommandError, run } from "./exec";
 export interface VideoInfo {
   id: string;
   title: string;
+  channel: string;
   duration: number;
   isLive: boolean;
   /** Piste de sous-titres à récupérer : langue d'origine de la vidéo de préférence. */
@@ -81,6 +82,8 @@ export async function fetchInfo(url: string): Promise<VideoInfo> {
   const info = JSON.parse(raw) as {
     id: string;
     title?: string;
+    channel?: string;
+    uploader?: string;
     duration?: number;
     is_live?: boolean;
     live_status?: string;
@@ -91,6 +94,7 @@ export async function fetchInfo(url: string): Promise<VideoInfo> {
   return {
     id: info.id,
     title: info.title ?? "Vidéo YouTube",
+    channel: info.channel ?? info.uploader ?? "",
     duration: info.duration ?? 0,
     isLive: Boolean(info.is_live) || info.live_status === "is_upcoming",
     subtitleLang: pickSubtitles(info.language, info.subtitles ?? {}, info.automatic_captions ?? {}),

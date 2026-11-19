@@ -21,6 +21,10 @@ export const config = {
     process.env.VICECLIP_PUBLIC_URL ||
     (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "")
   ).replace(/\/+$/, ""),
+  /** Clé d'API Anthropic. Sans elle, les shorts sont rendus sans titre incrusté. */
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
+  /** Modèle qui écrit le titre, la description et les hashtags de chaque short. */
+  titleModel: process.env.VICECLIP_TITLE_MODEL || "claude-opus-5-5",
   /** Durée maximale d'une vidéo source, en minutes. */
   maxSourceMinutes: num(process.env.VICECLIP_MAX_MINUTES, 90),
   /**
