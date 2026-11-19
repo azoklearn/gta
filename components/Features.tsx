@@ -59,14 +59,14 @@ export function Features() {
         <Card glow="rgba(255,46,139,0.6)">
           <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.032),transparent_70%)]" />
           <ul className="flex flex-col gap-2.5 p-4">
-            {demo.picks.map((short, i) => (
+            {demo.picks.map((short) => (
               <li key={short.image} className="flex items-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-3 py-2.5">
                 <span className="relative size-10 shrink-0 overflow-hidden rounded-full border border-white/10 bg-black">
                   <Image src={short.image} alt="" fill sizes="40px" className="object-cover" />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-[14px] font-semibold text-ink">
-                    {short.title || `Short n° ${i + 1} · ${short.channel}`}
+                    {short.title || `Vidéo de ${short.channel}`}
                   </span>
                   <span className="truncate text-[13px] text-muted">
                     {short.title ? `${short.channel} · ` : ""}score {short.score} sur 100 · sous-titré

@@ -104,5 +104,6 @@ export const demo = {
     "/demo/source-1.jpg",
     "/demo/source-2.jpg",
     "/demo/source-3.jpg",
+    "/demo/source-5.jpg",
   ],
 };
