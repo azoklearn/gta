@@ -7,6 +7,7 @@ ViceClip est un outil de clipping : il transforme les vidéos et les lives GTA 6
 Le serveur a besoin de deux outils en ligne de commande :
 
 - **ffmpeg** (avec libx264 et libass) pour l'analyse et le rendu ;
+- **Python 3 avec OpenCV** (`opencv-python-headless` 4.x, qui fournit le détecteur de visages) pour repérer la facecam ; sans lui, les shorts restent en plein écran ;
 - **yt-dlp** pour récupérer les vidéos YouTube, avec Node.js comme moteur JavaScript.
 
 ```bash
@@ -21,8 +22,9 @@ Le site est servi sur http://localhost:3000.
 1. `POST /api/jobs` reçoit le lien YouTube, crée un traitement et le place en file d'attente. Un seul traitement tourne à la fois.
 2. **Récupération** : yt-dlp télécharge la vidéo en 1080p au maximum, ainsi que ses sous-titres (manuels ou automatiques) quand il y en a.
 3. **Analyse** : ffmpeg mesure le niveau sonore seconde par seconde et les changements à l'image. Les fenêtres les plus intenses sont retenues sans chevauchement, avec un bonus quand le début est fort. Le score de 1 à 5 étoiles vient de ces mesures.
-4. **Rendu** : chaque passage est recadré au centre en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres.
-5. La page `/projets/<id>` suit l'avancement puis affiche les shorts, à lire et à télécharger. Ils sont supprimés au bout de 24 heures.
+4. **Facecam** : un visage qui revient au même endroit tout au long de la vidéo est celui du streamer ; le cadre de sa facecam est délimité par la zone qui reste immobile autour (`tools/facecam.py`, avec OpenCV).
+5. **Rendu** : chaque passage sort en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres. Avec une facecam, elle occupe le tiers haut et le jeu les deux tiers du bas ; sinon le jeu, recadré au centre, remplit l'écran.
+6. La page `/projets/<id>` suit l'avancement puis affiche les shorts, à lire et à télécharger. Ils sont supprimés au bout de 24 heures.
 
 Il n'y a ni compte ni paiement pour l'instant : les offres affichées sur la page d'accueil ne sont pas appliquées, chaque vidéo donne trois shorts.
 
@@ -53,7 +55,7 @@ Variables d'environnement, toutes facultatives :
 | `VICECLIP_ALLOWED_ORIGINS` | Sites autorisés à appeler le serveur de découpage | aucun |
 | `YTDLP_COOKIES` | Fichier de cookies transmis à yt-dlp | aucun |
 | `YTDLP_PROXY` | Proxy transmis à yt-dlp | aucun |
-| `FFMPEG_PATH`, `FFPROBE_PATH`, `YTDLP_PATH` | Chemins des outils | ceux du `PATH` |
+| `FFMPEG_PATH`, `FFPROBE_PATH`, `YTDLP_PATH`, `PYTHON_PATH` | Chemins des outils | ceux du `PATH` |
 
 ## Mise en ligne
 
@@ -83,6 +85,7 @@ YouTube refuse souvent les téléchargements venant d'adresses de centres de don
 ## Limites connues
 
 - Une vidéo sans sous-titres YouTube donne des shorts sans texte : il n'y a pas encore de transcription.
-- Le recadrage est centré, il ne suit pas un sujet qui s'écarte du milieu de l'image.
+- Le recadrage du jeu est centré, il ne suit pas un sujet qui s'écarte du milieu de l'image.
+- La détection de la facecam suppose un visage de face et une incrustation fixe ; un streamer incrusté sans cadre (fond vert) est cadré serré autour du visage.
 - La file d'attente est en mémoire : un redémarrage du serveur interrompt le traitement en cours.
 - Les légendes proposées reprennent le titre de la vidéo.

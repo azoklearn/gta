@@ -68,11 +68,16 @@ export async function refuseIfUnavailable(source: "youtube" | "upload"): Promise
 }
 
 /** État du serveur pour la route de diagnostic `/api/health`. */
-export async function serverHealth(): Promise<{ ok: boolean; youtube: boolean; problems: string[] }> {
+export async function serverHealth(): Promise<{ ok: boolean; youtube: boolean; facecam: boolean; problems: string[] }> {
   const problems = await inspect();
   return {
     ok: !problems.hosting && !problems.ffmpeg,
     youtube: !problems.hosting && !problems.ffmpeg && !problems.ytdlp,
+    // La mise en page « facecam en haut » demande Python et OpenCV ; sans eux les shorts restent en plein écran.
+    facecam: await capture(config.python, ["-c", "import cv2, numpy; cv2.CascadeClassifier"]).then(
+      () => true,
+      () => false,
+    ),
     problems: Object.values(problems),
   };
 }

@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Clip } from "@/lib/types";
 import { audioLevels, pickSegments, probe, sceneActivity } from "./analyze";
 import { config } from "./config";
+import { findFacecam } from "./facecam";
 import { clipPath, jobDir, readJob, updateJob } from "./jobs";
 import { renderClip, renderThumbnail } from "./render";
 import { buildAss, readJson3, type Word } from "./subtitles";
@@ -65,9 +66,10 @@ export async function runJob(id: string): Promise<void> {
 
     const seconds = Math.floor(media.duration);
     const levels = media.hasAudio
-      ? await audioLevels(source, seconds, (p) => progress(p * 0.5))
+      ? await audioLevels(source, seconds, (p) => progress(p * 0.45))
       : new Array<number>(seconds).fill(-60);
-    const activity = await sceneActivity(source, seconds, (p) => progress(0.5 + p * 0.5));
+    const activity = await sceneActivity(source, seconds, (p) => progress(0.45 + p * 0.45));
+    const facecam = await findFacecam(source, media.duration, media.width, media.height);
     const segments = pickSegments(levels, activity, config.shortsPerJob, config.clipSeconds);
     if (!segments.length) throw new UserError("Aucun passage exploitable n'a été trouvé dans cette vidéo.");
 
@@ -81,7 +83,7 @@ export async function runJob(id: string): Promise<void> {
       caption: segments.length > 1 ? `${job!.source.title} (partie ${i + 1})` : job!.source.title,
       hashtags: HASHTAGS,
     }));
-    await updateJob(id, { step: "render", progress: 0, rendered: 0, clips });
+    await updateJob(id, { step: "render", progress: 0, rendered: 0, clips, layout: facecam ? "facecam" : "full" });
 
     for (const clip of clips) {
       const output = clipPath(id, clip.index, "mp4");
@@ -92,6 +94,7 @@ export async function runJob(id: string): Promise<void> {
       await renderClip(source, output, {
         start: clip.start,
         duration: clip.duration,
+        facecam,
         assFile: ass ? assFile : undefined,
         onProgress: (p) => progress((clip.index - 1 + p) / clips.length),
       });

@@ -275,6 +275,11 @@ function Results({ job }: { job: JobState }) {
           {done ? (ready.length > 1 ? `Tes ${ready.length} shorts sont prêts` : "Ton short est prêt") : job.source.title}
         </h1>
         {done && <p className="mt-3 text-[17px] text-body">{job.source.title}</p>}
+        {job.layout === "facecam" && (
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-medium text-ink shadow-card">
+            <span className="h-1.5 w-1.5 rounded-full bg-pink" /> Facecam détectée : elle est placée en haut des shorts
+          </p>
+        )}
       </div>
 
       {!done && (

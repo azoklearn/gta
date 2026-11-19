@@ -6,21 +6,29 @@ export interface Probe {
   duration: number;
   hasAudio: boolean;
   hasVideo: boolean;
+  width: number;
+  height: number;
 }
 
 export async function probe(file: string): Promise<Probe> {
   const out = await capture(config.ffprobe, [
     "-v", "error",
-    "-show_entries", "format=duration:stream=codec_type",
+    "-show_entries", "format=duration:stream=codec_type,width,height",
     "-of", "json",
     file,
   ]);
-  const data = JSON.parse(out) as { format?: { duration?: string }; streams?: { codec_type?: string }[] };
-  const types = (data.streams ?? []).map((s) => s.codec_type);
+  const data = JSON.parse(out) as {
+    format?: { duration?: string };
+    streams?: { codec_type?: string; width?: number; height?: number }[];
+  };
+  const streams = data.streams ?? [];
+  const video = streams.find((s) => s.codec_type === "video");
   return {
     duration: Number(data.format?.duration ?? 0),
-    hasAudio: types.includes("audio"),
-    hasVideo: types.includes("video"),
+    hasAudio: streams.some((s) => s.codec_type === "audio"),
+    hasVideo: Boolean(video),
+    width: video?.width ?? 0,
+    height: video?.height ?? 0,
   };
 }
 

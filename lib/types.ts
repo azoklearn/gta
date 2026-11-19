@@ -44,6 +44,8 @@ export interface Job {
     /** Durée de la vidéo source, en secondes. */
     duration?: number;
   };
+  /** Mise en page des shorts : plein écran, ou facecam du streamer en haut et jeu en dessous. */
+  layout?: "full" | "facecam";
   /** Nombre de shorts déjà rendus pendant l'étape « render ». */
   rendered: number;
   clips: Clip[];

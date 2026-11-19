@@ -30,6 +30,8 @@ export const config = {
   ffmpeg: process.env.FFMPEG_PATH || "ffmpeg",
   ffprobe: process.env.FFPROBE_PATH || "ffprobe",
   ytdlp: process.env.YTDLP_PATH || "yt-dlp",
+  /** Python sert à la détection de la facecam (avec OpenCV). */
+  python: process.env.PYTHON_PATH || "python3",
   /** Fichier de cookies et proxy facultatifs pour yt-dlp, utiles si YouTube bloque l'adresse du serveur. */
   ytdlpCookies: process.env.YTDLP_COOKIES || "",
   ytdlpProxy: process.env.YTDLP_PROXY || "",

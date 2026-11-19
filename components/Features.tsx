@@ -43,7 +43,7 @@ export function Features() {
         <Card
           className="lg:col-span-2"
           title="Plein écran vertical, sans bandes noires"
-          text="Le cadre se place au centre de l'image, là où se trouve le personnage dans GTA. Le short remplit tout l'écran du téléphone, en 1080 × 1920."
+          text="Le jeu est recadré au centre, là où se trouve le personnage, et remplit l'écran du téléphone. Si le streamer a une facecam, elle est repérée et placée en haut, le jeu en dessous."
         >
           <div className="relative overflow-hidden rounded-2xl">
             <Image

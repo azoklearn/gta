@@ -15,7 +15,7 @@ const QUESTIONS = [
   },
   {
     q: "Qu'est-ce qui rend un short « optimisé » ?",
-    a: "Le passage est choisi là où le son et l'image s'emballent, avec une préférence pour ceux qui démarrent fort. Le short sort en plein écran vertical, sous-titré, au-dessus d'une minute pour rester éligible à la rémunération, et reçoit un score qui te dit lequel publier en premier.",
+    a: "Le passage est choisi là où le son et l'image s'emballent, avec une préférence pour ceux qui démarrent fort. Le short sort en plein écran vertical, avec la facecam du streamer en haut quand il y en a une, sous-titré, au-dessus d'une minute pour rester éligible à la rémunération, et reçoit un score qui te dit lequel publier en premier.",
   },
   {
     q: "Combien de temps prend le découpage ?",

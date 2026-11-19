@@ -1,25 +1,40 @@
 import { config } from "./config";
 import { run } from "./exec";
+import { FACECAM_HEIGHT, FACECAM_WIDTH, type Region } from "./facecam";
 
 /** Échappe un chemin utilisé comme valeur d'option dans un filtre ffmpeg. */
 function filterPath(p: string): string {
   return p.replace(/\\/g, "/").replace(/([:'\[\],;])/g, "\\\\$1");
 }
 
-/** Recadre au centre en 9:16 quel que soit le format d'origine, puis met à l'échelle en 1080 × 1920. */
-const VERTICAL = "crop='min(iw,ih*9/16)':'min(ih,iw*16/9)',scale=1080:1920:flags=bicubic,setsar=1";
+/** Recadre au centre au format voulu quel que soit le format d'origine, puis met à l'échelle. */
+function cover(width: number, height: number): string {
+  return `crop='min(iw,ih*${width}/${height})':'min(ih,iw*${height}/${width})',scale=${width}:${height}:flags=bicubic,setsar=1`;
+}
 
 /**
  * Rend un short vertical à partir de la vidéo source.
- * `assFile`, s'il est fourni, est incrusté par-dessus l'image.
+ *
+ * Sans `facecam`, le jeu occupe tout l'écran. Avec, la facecam du streamer remplit le tiers haut
+ * et le jeu les deux tiers du bas. `assFile`, s'il est fourni, est incrusté par-dessus l'image.
  */
 export async function renderClip(
   source: string,
   output: string,
-  opts: { start: number; duration: number; assFile?: string; onProgress: (p: number) => void },
+  opts: { start: number; duration: number; facecam?: Region | null; assFile?: string; onProgress: (p: number) => void },
 ): Promise<void> {
-  const filters = [VERTICAL];
-  if (opts.assFile) filters.push(`subtitles=filename=${filterPath(opts.assFile)}:fontsdir=${filterPath(config.fontsDir)}`);
+  const subtitles = opts.assFile
+    ? `,subtitles=filename=${filterPath(opts.assFile)}:fontsdir=${filterPath(config.fontsDir)}`
+    : "";
+  const cam = opts.facecam;
+  const graph = cam
+    ? [
+        `[0:v]split=2[game][cam]`,
+        `[cam]crop=${cam.w}:${cam.h}:${cam.x}:${cam.y},scale=${FACECAM_WIDTH}:${FACECAM_HEIGHT}:flags=lanczos,setsar=1[top]`,
+        `[game]${cover(1080, 1920 - FACECAM_HEIGHT)}[bottom]`,
+        `[top][bottom]vstack=inputs=2${subtitles}[out]`,
+      ].join(";")
+    : `[0:v]${cover(1080, 1920)}${subtitles}[out]`;
 
   await run(
     config.ffmpeg,
@@ -29,7 +44,8 @@ export async function renderClip(
       "-ss", opts.start.toFixed(3),
       "-t", opts.duration.toFixed(3),
       "-i", source,
-      "-vf", filters.join(","),
+      "-filter_complex", graph,
+      "-map", "[out]", "-map", "0:a?",
       "-fpsmax", "60",
       "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-maxrate", "10M", "-bufsize", "20M", "-pix_fmt", "yuv420p",
       "-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2",
