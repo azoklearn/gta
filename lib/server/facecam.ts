@@ -17,6 +17,12 @@ type Detection = { found: false } | { found: true; rect: Fractions; face: Fracti
 export const FACECAM_WIDTH = 1080;
 export const FACECAM_HEIGHT = 640;
 const ASPECT = FACECAM_WIDTH / FACECAM_HEIGHT;
+/**
+ * Format le plus étroit accepté pour une facecam encadrée. Une facecam presque carrée n'est pas
+ * recadrée jusqu'à remplir le bandeau (le visage serait énorme et coupé) : elle est montrée presque
+ * entière, et le rendu comble les côtés avec un fond flouté.
+ */
+const MIN_ASPECT = 1.2;
 
 const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
@@ -51,11 +57,13 @@ export async function findFacecam(video: string, duration: number, width: number
   const bounds: Region = detection.boxed
     ? { x: detection.rect.x * width, y: detection.rect.y * height, w: detection.rect.w * width, h: detection.rect.h * height }
     : { x: 0, y: 0, w: width, h: height };
-  const wanted = detection.boxed ? bounds.w : Math.min(bounds.w, face.w * 4.2);
+  const wanted = detection.boxed ? bounds.w : Math.min(bounds.w, face.w * 4.6);
 
-  // Recadrage au format du bandeau, le plus large possible dans cette zone.
-  const w = Math.min(wanted, bounds.h * ASPECT);
-  const h = w / ASPECT;
+  // Recadrage le plus large possible dans cette zone : au format du bandeau, ou plus étroit si la
+  // facecam elle-même est plus étroite.
+  const aspect = detection.boxed ? clamp(bounds.w / bounds.h, MIN_ASPECT, ASPECT) : ASPECT;
+  const w = Math.min(wanted, bounds.h * aspect);
+  const h = w / aspect;
   // Le visage est centré en largeur et placé un peu au-dessus du milieu en hauteur.
   const x = clamp(faceCenterX - w / 2, bounds.x, bounds.x + bounds.w - w);
   const y = clamp(faceCenterY - h * 0.45, bounds.y, bounds.y + bounds.h - h);

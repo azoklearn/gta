@@ -30,7 +30,7 @@ export async function renderClip(
   const graph = cam
     ? [
         `[0:v]split=2[game][cam]`,
-        `[cam]crop=${cam.w}:${cam.h}:${cam.x}:${cam.y},scale=${FACECAM_WIDTH}:${FACECAM_HEIGHT}:flags=lanczos,setsar=1[top]`,
+        ...facecamBand(cam),
         `[game]${cover(1080, 1920 - FACECAM_HEIGHT)}[bottom]`,
         `[top][bottom]vstack=inputs=2${subtitles}[out]`,
       ].join(";")
@@ -60,6 +60,27 @@ export async function renderClip(
       },
     },
   );
+}
+
+/**
+ * Filtres qui produisent le bandeau du haut (`[top]`) à partir de la facecam (`[cam]`).
+ * Une facecam au format du bandeau le remplit. Une facecam plus étroite est montrée à sa taille,
+ * centrée sur une copie floutée et assombrie d'elle-même qui comble les côtés.
+ */
+function facecamBand(cam: Region): string[] {
+  const crop = `crop=${cam.w}:${cam.h}:${cam.x}:${cam.y}`;
+  // Une petite facecam est beaucoup agrandie : un léger renforcement de la netteté compense.
+  const sharpen = "unsharp=5:5:0.6:5:5:0";
+  if (cam.w / cam.h >= FACECAM_WIDTH / FACECAM_HEIGHT - 0.03) {
+    return [`[cam]${crop},scale=${FACECAM_WIDTH}:${FACECAM_HEIGHT}:flags=lanczos,${sharpen},setsar=1[top]`];
+  }
+  const small = `${FACECAM_WIDTH / 4}:${FACECAM_HEIGHT / 4}`;
+  return [
+    `[cam]${crop},split=2[camfill][camface]`,
+    `[camfill]scale=${small}:force_original_aspect_ratio=increase,crop=${small},boxblur=7:2,eq=brightness=-0.1:saturation=1.15,scale=${FACECAM_WIDTH}:${FACECAM_HEIGHT}:flags=bicubic[fill]`,
+    `[camface]scale=-2:${FACECAM_HEIGHT}:flags=lanczos,${sharpen}[face]`,
+    `[fill][face]overlay=(W-w)/2:0,setsar=1[top]`,
+  ];
 }
 
 /** Extrait une vignette du short rendu. */
