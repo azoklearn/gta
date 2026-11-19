@@ -67,7 +67,7 @@ Le même dépôt est déployé deux fois : Vercel sert les pages, un second serv
 3. Ouvre `https://<serveur>/api/health` : la réponse doit contenir `"ok": true`. Sinon elle dit ce qui manque.
 4. **Site.** Sur Vercel, ajoute la variable d'environnement `NEXT_PUBLIC_VICECLIP_API` avec l'adresse du serveur de découpage (`https://<serveur>`, sans chemin), puis redéploie : cette variable est lue au moment de la construction du site.
 
-Le `Dockerfile` n'a pas encore été construit ni testé ; le montage en deux parties a été vérifié en local avec deux instances du site.
+Ce dépôt est déjà réglé ainsi : le serveur de découpage tourne sur Railway (projet `viceclip`, service `decoupage`, déployé à chaque envoi sur la branche) et son adresse est enregistrée dans `.env.production`, que Vercel lit à la construction. Si l'adresse du serveur change, mets ce fichier à jour.
 
 ### Tout sur un seul serveur
 
