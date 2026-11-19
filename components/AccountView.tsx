@@ -118,7 +118,7 @@ export function AccountView() {
                 : `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`}
             </p>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-sm text-muted">Shorts restants</p>
             <p className="display mt-1 text-5xl tabular-nums text-gradient">{account.credits}</p>
             {plan && <p className="mt-1 text-[13px] text-muted">sur {plan.shortsPerMonth} ce mois-ci</p>}

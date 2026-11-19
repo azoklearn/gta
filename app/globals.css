@@ -114,8 +114,8 @@ body {
     inset-block: 0;
     left: 0;
     width: 34%;
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.85), transparent);
-    mix-blend-mode: overlay;
+    background: linear-gradient(90deg, transparent, rgb(0 0 0 / 0.14), transparent);
+    transform: translateX(-140%) skewX(-18deg);
     animation: shine 3.6s ease-in-out infinite;
     pointer-events: none;
   }

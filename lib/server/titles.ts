@@ -140,7 +140,7 @@ export async function writeCopy(
       });
     }
 
-    const client = new Anthropic({ apiKey: config.anthropicApiKey, timeout: 90_000, maxRetries: 2 });
+    const client = new Anthropic({ apiKey: config.anthropicApiKey, timeout: 60_000, maxRetries: 1 });
     const response = await client.beta.messages.parse({
       model: config.titleModel,
       max_tokens: 8000,
