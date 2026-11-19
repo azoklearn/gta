@@ -23,7 +23,7 @@ const QUESTIONS = [
   },
   {
     q: "Mes shorts auront-ils des sous-titres ?",
-    a: "Oui quand la vidéo YouTube en propose, y compris les sous-titres générés automatiquement. Pour un fichier importé, les shorts sortent pour l'instant sans sous-titres.",
+    a: "Oui quand la vidéo YouTube en propose, y compris les sous-titres générés automatiquement, ce qui est le cas de la plupart des vidéos parlées. Sans sous-titres disponibles, le short sort sans texte.",
   },
   {
     q: "Est-ce que ça marche pour d'autres jeux ?",

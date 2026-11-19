@@ -3,7 +3,7 @@ import { SectionHeading } from "./Section";
 const STEPS = [
   {
     title: "Choisis une vidéo",
-    text: "Le live, le let's play ou la compilation GTA 6 d'un youtubeur ou d'un streamer, jusqu'à 1 h 30. Colle son lien YouTube ou importe le fichier.",
+    text: "Le live, le let's play ou la compilation GTA 6 d'un youtubeur ou d'un streamer, jusqu'à 1 h 30. Colle simplement son lien YouTube.",
   },
   {
     title: "ViceClip fait les shorts",

@@ -43,7 +43,7 @@ async function inspect(): Promise<Check["problems"]> {
   }
   if (!(await available(config.ytdlp, "--version"))) {
     problems.ytdlp =
-      "yt-dlp n'est pas installé sur le serveur : les liens YouTube ne peuvent pas être récupérés. Importe directement un fichier vidéo.";
+      "yt-dlp n'est pas installé sur le serveur : les liens YouTube ne peuvent pas être récupérés.";
   }
   return problems;
 }

@@ -29,14 +29,14 @@ function explain(err: unknown): Error {
   if (/introuvable sur le serveur/.test(text)) return new UserError("yt-dlp n'est pas installé sur le serveur.");
   if (/not a bot|Sign in to confirm|HTTP Error 429|This content isn.t available, try again later/i.test(text)) {
     return new UserError(
-      "YouTube a refusé le téléchargement depuis ce serveur (protection anti-robot). Réessaie plus tard ou importe directement le fichier vidéo.",
+      "YouTube a refusé de fournir cette vidéo à notre serveur (protection anti-robot). Réessaie dans quelques minutes.",
     );
   }
   if (/Private video|members-only|This video is private/i.test(text)) return new UserError("Cette vidéo est privée ou réservée aux membres.");
   if (/age|confirm your age/i.test(text) && /Sign in/i.test(text)) return new UserError("Cette vidéo est soumise à une limite d'âge et ne peut pas être récupérée.");
   if (/Video unavailable|This video is not available|has been removed|does not exist/i.test(text)) return new UserError("Cette vidéo est introuvable ou indisponible.");
   if (/Unable to download|timed out|Connection|Tunnel|403: Forbidden|getaddrinfo|Name or service/i.test(text)) {
-    return new UserError("Le serveur n'a pas pu joindre YouTube. Réessaie dans quelques minutes ou importe le fichier vidéo.");
+    return new UserError("Le serveur n'a pas pu joindre YouTube. Réessaie dans quelques minutes.");
   }
   const last = text.split("\n").filter((l) => l.startsWith("ERROR")).pop();
   return new UserError(`Le téléchargement a échoué${last ? ` : ${last.replace(/^ERROR:\s*/, "").slice(0, 200)}` : "."}`);

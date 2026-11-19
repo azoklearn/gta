@@ -13,7 +13,10 @@ import { refuseIfUnavailable, unexpectedError } from "@/lib/server/preflight";
 
 const EXTENSIONS = new Set(["mp4", "mov", "mkv", "webm", "m4v"]);
 
-/** Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage. */
+/**
+ * Reçoit un fichier vidéo envoyé tel quel dans le corps de la requête, puis lance son découpage.
+ * Route d'essai, fermée par défaut (voir `allowUpload` dans la configuration).
+ */
 export async function POST(request: Request) {
   try {
     return withCors(request, await receive(request));
@@ -27,6 +30,9 @@ export function OPTIONS(request: Request) {
 }
 
 async function receive(request: Request): Promise<Response> {
+  if (!config.allowUpload) {
+    return Response.json({ error: "L'import de fichier n'est pas disponible. Colle le lien d'une vidéo YouTube." }, { status: 404 });
+  }
   let rawName = request.headers.get("x-filename") ?? "";
   try {
     rawName = decodeURIComponent(rawName);

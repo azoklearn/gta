@@ -12,6 +12,11 @@ export const config = {
   fontsDir: path.join(process.cwd(), "assets", "fonts"),
   /** Durée maximale d'une vidéo source, en minutes. */
   maxSourceMinutes: num(process.env.VICECLIP_MAX_MINUTES, 90),
+  /**
+   * Import direct d'un fichier vidéo par `POST /api/jobs/upload`. Le site ne le propose pas : cette route
+   * sert aux essais et reste fermée tant que `VICECLIP_ALLOW_UPLOAD=1` n'est pas réglé.
+   */
+  allowUpload: process.env.VICECLIP_ALLOW_UPLOAD === "1",
   /** Taille maximale d'un fichier importé, en octets. */
   maxUploadBytes: num(process.env.VICECLIP_MAX_UPLOAD_MB, 2048) * 1024 * 1024,
   /** Nombre de shorts produits par vidéo. */

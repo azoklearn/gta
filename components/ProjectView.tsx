@@ -268,7 +268,7 @@ function Results({ job }: { job: JobState }) {
     <>
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-medium text-ink/70">
-          {job.source.kind === "youtube" ? "Vidéo YouTube" : "Fichier importé"}
+          {job.source.kind === "youtube" ? "Vidéo YouTube" : "Fichier d'essai"}
           {job.source.duration ? ` · ${clock(job.source.duration)}` : ""}
         </p>
         <h1 className="display mt-2 text-balance text-[clamp(1.9rem,5vw,2.9rem)] leading-[1.08]">

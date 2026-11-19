@@ -1,6 +1,6 @@
 # ViceClip
 
-ViceClip est un outil de clipping : il transforme les vidéos et les lives GTA 6 de youtubeurs et de streamers en shorts verticaux prêts à poster sur TikTok, Shorts et Reels. On colle un lien YouTube (ou on importe un fichier), le serveur repère les passages les plus intenses, les recadre en 9:16, incruste les sous-titres et propose les shorts au téléchargement.
+ViceClip est un outil de clipping : il transforme les vidéos et les lives GTA 6 de youtubeurs et de streamers en shorts verticaux prêts à poster sur TikTok, Shorts et Reels. On colle le lien d'une vidéo YouTube, le serveur repère les passages les plus intenses, les recadre en 9:16, incruste les sous-titres et propose les shorts au téléchargement.
 
 ## Lancer le projet
 
@@ -18,7 +18,7 @@ Le site est servi sur http://localhost:3000.
 
 ## Comment ça marche
 
-1. `POST /api/jobs` (lien YouTube) ou `POST /api/jobs/upload` (fichier) crée un traitement et le place en file d'attente. Un seul traitement tourne à la fois.
+1. `POST /api/jobs` reçoit le lien YouTube, crée un traitement et le place en file d'attente. Un seul traitement tourne à la fois.
 2. **Récupération** : yt-dlp télécharge la vidéo en 1080p au maximum, ainsi que ses sous-titres (manuels ou automatiques) quand il y en a.
 3. **Analyse** : ffmpeg mesure le niveau sonore seconde par seconde et les changements à l'image. Les fenêtres les plus intenses sont retenues sans chevauchement, avec un bonus quand le début est fort. Le score de 1 à 5 étoiles vient de ces mesures.
 4. **Rendu** : chaque passage est recadré au centre en 1080 × 1920, encodé en H.264, et sous-titré si la vidéo source avait des sous-titres.
@@ -44,7 +44,8 @@ Variables d'environnement, toutes facultatives :
 | --- | --- | --- |
 | `VICECLIP_DATA_DIR` | Dossier des vidéos en cours et des shorts | `./data` |
 | `VICECLIP_MAX_MINUTES` | Durée maximale d'une vidéo source | `90` |
-| `VICECLIP_MAX_UPLOAD_MB` | Taille maximale d'un fichier importé | `2048` |
+| `VICECLIP_ALLOW_UPLOAD` | Mettre à `1` pour ouvrir la route d'essai `POST /api/jobs/upload` (import direct d'un fichier, non proposé sur le site) | fermée |
+| `VICECLIP_MAX_UPLOAD_MB` | Taille maximale d'un fichier envoyé à la route d'essai | `2048` |
 | `VICECLIP_SHORTS_PER_JOB` | Nombre de shorts par vidéo | `3` |
 | `VICECLIP_CLIP_SECONDS` | Durée de chaque short | `64` |
 | `VICECLIP_JOB_TTL_HOURS` | Durée de conservation des shorts | `24` |
@@ -77,11 +78,11 @@ Déploie le `Dockerfile` et pointe ton domaine dessus, sans régler `NEXT_PUBLIC
 
 Avant chaque découpage, le serveur vérifie qu'il peut écrire dans son dossier de travail et que ffmpeg et yt-dlp sont installés ; sinon le formulaire affiche la raison au lieu de lancer un traitement voué à l'échec.
 
-YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Le serveur relance automatiquement ; si le refus persiste, renseigne `YTDLP_COOKIES` ou `YTDLP_PROXY`. L'import de fichier fonctionne dans tous les cas.
+YouTube refuse souvent les téléchargements venant d'adresses de centres de données (« Sign in to confirm you're not a bot »). Le serveur relance automatiquement ; si le refus persiste, les liens ne passent pas : c'est la principale limite actuelle du service (voir `YTDLP_COOKIES` et `YTDLP_PROXY`).
 
 ## Limites connues
 
-- Les fichiers importés sortent sans sous-titres : il n'y a pas encore de transcription.
+- Une vidéo sans sous-titres YouTube donne des shorts sans texte : il n'y a pas encore de transcription.
 - Le recadrage est centré, il ne suit pas un sujet qui s'écarte du milieu de l'image.
 - La file d'attente est en mémoire : un redémarrage du serveur interrompt le traitement en cours.
 - Les légendes proposées reprennent le titre de la vidéo.
