@@ -124,6 +124,8 @@ export async function runJob(id: string): Promise<void> {
     const message =
       err instanceof UserError ? err.message : "Le traitement a échoué de façon inattendue. Réessaie avec une autre vidéo.";
     if (!(err instanceof UserError)) console.error(`[gtaclip] ${id}`, err);
+    // Les refus sont tracés aussi : ils montrent quand YouTube bloque le serveur.
+    else console.warn(`[gtaclip] ${id} refusé : ${message}`);
     await updateJob(id, { status: "error", error: message })
       .then(settleJob)
       .catch(() => {});

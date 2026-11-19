@@ -30,7 +30,7 @@ function explain(err: unknown): Error {
   if (/introuvable sur le serveur/.test(text)) return new UserError("yt-dlp n'est pas installé sur le serveur.");
   if (/not a bot|Sign in to confirm|HTTP Error 429|This content isn.t available, try again later/i.test(text)) {
     return new UserError(
-      "YouTube a refusé de fournir cette vidéo à notre serveur (protection anti-robot). Réessaie dans quelques minutes.",
+      "YouTube refuse pour l'instant de fournir ses vidéos à notre serveur (protection anti-robot). Aucun short n'a été décompté de ton offre : réessaie un peu plus tard.",
     );
   }
   if (/Private video|members-only|This video is private/i.test(text)) return new UserError("Cette vidéo est privée ou réservée aux membres.");
