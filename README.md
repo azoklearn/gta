@@ -17,6 +17,14 @@ npm run dev
 
 Le site est servi sur http://localhost:3000.
 
+## Parcours sur le site
+
+1. Le visiteur colle un lien YouTube : la vidéo est reconnue (`GET /api/video`, miniature, titre et chaîne) et affichée avec le bouton « Créer mes shorts ».
+2. Ce bouton demande la connexion, puis ouvre la fenêtre des offres si le compte n'a pas de shorts disponibles.
+3. Une fois l'offre payée, la page `/importer` explique comment récupérer la vidéo sur son ordinateur et reçoit le fichier (`POST /api/jobs/upload`, ouvert avec `VICECLIP_ALLOW_UPLOAD=1`). Le lien d'origine accompagne le fichier : il donne le titre du projet et sert à demander les sous-titres à YouTube.
+
+Le serveur ne télécharge donc plus la vidéo lui-même sur ce parcours : YouTube refuse la plupart des téléchargements venant d'un centre de données. `POST /api/jobs` (découpage à partir du lien seul) existe toujours.
+
 ## Comment ça marche
 
 1. `POST /api/jobs` reçoit le lien YouTube, crée un traitement et le place en file d'attente. Un seul traitement tourne à la fois.

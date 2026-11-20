@@ -19,12 +19,16 @@ const QUESTIONS = [
     a: "Le passage est choisi là où le son et l'image s'emballent, avec une préférence pour ceux qui démarrent fort. Le short sort en plein écran vertical, avec la facecam du streamer en haut quand il y en a une, titré, sous-titré, au-dessus d'une minute pour rester éligible à la rémunération, et reçoit un score qui te dit lequel publier en premier.",
   },
   {
+    q: "Comment la vidéo arrive-t-elle chez GTAClip ?",
+    a: "Tu colles le lien YouTube pour que GTAClip reconnaisse la vidéo, tu choisis ton offre, puis tu nous envoies le fichier de la vidéo depuis ton ordinateur. Un guide t'explique comment la récupérer : depuis YouTube Studio si c'est ta vidéo, ou avec un logiciel de téléchargement si c'est celle d'un autre créateur, avec son accord. GTAClip ne télécharge pas la vidéo à ta place.",
+  },
+  {
     q: "Combien de temps prend le découpage ?",
     a: "Quelques minutes pour une vidéo standard. Tu reçois de 3 à 8 shorts selon ton offre, classés par score Wanted, à regarder dans la page puis à télécharger. Ils restent disponibles 24 heures.",
   },
   {
     q: "Mes shorts auront-ils des sous-titres ?",
-    a: "Oui quand la vidéo YouTube en propose, y compris les sous-titres générés automatiquement, ce qui est le cas de la plupart des vidéos parlées. Sans sous-titres disponibles, le short sort sans texte.",
+    a: "Quand YouTube nous laisse récupérer les sous-titres de la vidéo que tu as indiquée, y compris ceux générés automatiquement, ils sont incrustés mot à mot. Quand il refuse ou que la vidéo n'en a pas, le short sort sans sous-titres.",
   },
   {
     q: "Est-ce que ça marche pour d'autres jeux ?",
