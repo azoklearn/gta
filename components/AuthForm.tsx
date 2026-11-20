@@ -7,8 +7,26 @@ import { authenticate, resumeAfterAuth } from "@/lib/account";
 import { FREE_TRIAL } from "@/lib/plans";
 import { ArrowRight } from "./Icons";
 
-/** Formulaire d'inscription ou de connexion. Après succès, l'utilisateur reprend là où il s'était arrêté. */
-export function AuthForm({ mode }: { mode: "signup" | "login" }) {
+type Mode = "signup" | "login";
+
+/**
+ * Formulaire d'inscription ou de connexion. Après succès, l'utilisateur reprend là où il s'était arrêté.
+ *
+ * Dans une fenêtre ouverte par-dessus la page (`onModeChange` fourni), passer de l'inscription à la
+ * connexion se fait sur place, et `onDone` referme la fenêtre une fois la session ouverte.
+ */
+export function AuthForm({
+  mode,
+  intro,
+  onModeChange,
+  onDone,
+}: {
+  mode: Mode;
+  /** Phrase d'introduction qui remplace celle par défaut. */
+  intro?: string;
+  onModeChange?: (mode: Mode) => void;
+  onDone?: () => void;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +47,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
     }
     const next = await resumeAfterAuth();
     if (next.error) window.sessionStorage.setItem("viceclip.message", next.error);
+    onDone?.();
     if (next.goTo) router.push(next.goTo);
   }
 
@@ -39,11 +58,12 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
     <div className="panel mx-auto w-full max-w-md p-7 sm:p-9">
       <h1 className="display text-[2rem] leading-none">{signup ? "Crée ton compte" : "Content de te revoir"}</h1>
       <p className="mt-2 leading-relaxed text-ink-soft">
-        {signup
+        {intro ??
+          (signup
           ? FREE_TRIAL.shorts > 0
             ? `${FREE_TRIAL.shorts} shorts offerts pour essayer, sans carte bancaire.`
             : "Une minute pour créer ton compte, puis tu choisis ton offre."
-          : "Connecte-toi pour retrouver tes shorts et ton offre."}
+          : "Connecte-toi pour retrouver tes shorts et ton offre.")}
       </p>
 
       <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -53,6 +73,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
             type="email"
             required
             autoComplete="email"
+            autoFocus={Boolean(onModeChange)}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="toi@exemple.com"
@@ -89,9 +110,25 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
 
       <p className="mt-6 text-center text-[15px] text-ink-soft">
         {signup ? "Déjà un compte ? " : "Pas encore de compte ? "}
-        <Link href={signup ? "/connexion" : "/inscription"} className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white">
-          {signup ? "Me connecter" : "Créer un compte"}
-        </Link>
+        {onModeChange ? (
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              onModeChange(signup ? "login" : "signup");
+            }}
+            className="cursor-pointer font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white"
+          >
+            {signup ? "Me connecter" : "Créer un compte"}
+          </button>
+        ) : (
+          <Link
+            href={signup ? "/connexion" : "/inscription"}
+            className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white"
+          >
+            {signup ? "Me connecter" : "Créer un compte"}
+          </Link>
+        )}
       </p>
     </div>
   );

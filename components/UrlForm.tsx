@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isSignedIn, rememberUrl, startJob } from "@/lib/account";
 import { parseYouTubeId } from "@/lib/youtube";
+import { AuthDialog } from "./AuthDialog";
 import { ArrowRight, LinkIcon } from "./Icons";
 
 export function UrlForm({ id = "yt-url" }: { id?: string }) {
@@ -12,6 +13,13 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [needsPlan, setNeedsPlan] = useState(false);
+  const [asking, setAsking] = useState(false);
+
+  /** Un visiteur sans compte se connecte dès que son lien est donné, avant toute autre étape. */
+  function askToSignIn(link: string) {
+    rememberUrl(link);
+    setAsking(true);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,8 +31,7 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
     setError(null);
     // Le découpage est rattaché à un compte : un visiteur crée d'abord le sien, puis reprend ici.
     if (!isSignedIn()) {
-      rememberUrl(url);
-      router.push("/inscription");
+      askToSignIn(url);
       return;
     }
     setBusy(true);
@@ -40,6 +47,7 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
 
   return (
     <div className="mx-auto flex w-full max-w-[37rem] flex-col items-center gap-3">
+      {asking && <AuthDialog onClose={() => setAsking(false)} />}
       <form
         onSubmit={onSubmit}
         noValidate
@@ -60,8 +68,11 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
             value={url}
             disabled={busy}
             onChange={(e) => {
-              setUrl(e.target.value);
+              const value = e.target.value;
+              setUrl(value);
               setError(null);
+              // Dès que le lien est complet, la connexion est demandée sans attendre le bouton.
+              if (parseYouTubeId(value) && !isSignedIn()) askToSignIn(value);
             }}
             aria-invalid={error !== null}
             aria-describedby={`${id}-msg`}
