@@ -166,9 +166,36 @@ export function ImportView() {
               {copied ? "Copié" : "Copier"}
             </button>
           </div>
+          <details className="group rounded-[12px] border border-white/10 bg-white/[0.03] px-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3 text-[14.5px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+              Première fois&nbsp;? Installe yt-dlp avant
+              <span aria-hidden="true" className="text-muted transition group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <div className="space-y-3 pb-4 text-[14px]">
+              <p>
+                <strong className="font-semibold text-ink">Sur Windows&nbsp;:</strong> ouvre PowerShell (ou Terminal) et lance
+                la commande ci-dessous, puis ferme et rouvre la fenêtre.
+              </p>
+              <code className="block overflow-x-auto rounded-[10px] border border-white/10 bg-black/60 px-3 py-2.5 font-mono text-[12.5px] whitespace-nowrap select-all">
+                winget install yt-dlp.yt-dlp
+              </code>
+              <p>
+                <strong className="font-semibold text-ink">Sur Mac&nbsp;:</strong> installe d&apos;abord Homebrew (brew.sh),
+                puis lance dans Terminal&nbsp;:
+              </p>
+              <code className="block overflow-x-auto rounded-[10px] border border-white/10 bg-black/60 px-3 py-2.5 font-mono text-[12.5px] whitespace-nowrap select-all">
+                brew install yt-dlp ffmpeg
+              </code>
+              <p className="text-muted">
+                La vidéo téléchargée arrive dans le dossier où se trouve le terminal, en général ton dossier personnel.
+              </p>
+            </div>
+          </details>
           <p className="text-[13.5px] text-muted">
             Garde la vidéo entière, en MP4 et en 1080p si possible. Ton offre accepte les vidéos jusqu&apos;à{" "}
-            {length(maxMinutes)}.
+            {length(maxMinutes)}, et le fichier ne doit pas dépasser 2 Go.
           </p>
         </Step>
 
