@@ -159,10 +159,25 @@ export function pendingUrl(): string | null {
   }
 }
 
-/** Lance le découpage du lien en attente. */
-export async function resumePendingUrl(): Promise<{ id?: string; error?: string }> {
-  const url = take(PENDING_URL);
-  return url ? startJob(url) : { error: "Aucune vidéo en attente." };
+/** Oublie le lien en attente, une fois la vidéo envoyée. */
+export const forgetUrl = () => stash(PENDING_URL, null);
+
+/** Ce que le site sait d'une vidéo YouTube à partir de son lien. */
+export interface VideoPreview {
+  id: string;
+  title: string | null;
+  channel: string | null;
+  thumbnail: string;
+}
+
+/** Reconnaît une vidéo YouTube : miniature, et titre et chaîne quand YouTube les donne. */
+export async function lookupVideo(url: string): Promise<VideoPreview | null> {
+  try {
+    const reply = await fetch(apiUrl(`/api/video?url=${encodeURIComponent(url)}`));
+    return reply.ok ? ((await reply.json()) as VideoPreview) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Lance le découpage d'une vidéo. Renvoie l'identifiant du projet, ou un message d'erreur. */
@@ -179,7 +194,11 @@ export async function startJob(url: string): Promise<{ id?: string; error?: stri
  * Envoie un fichier vidéo au serveur et lance son découpage. Sert de secours quand YouTube refuse
  * de fournir la vidéo. `onProgress` reçoit l'avancement de l'envoi, de 0 à 1.
  */
-export function uploadVideo(file: File, onProgress: (ratio: number) => void): Promise<{ id?: string; error?: string }> {
+export function uploadVideo(
+  file: File,
+  onProgress: (ratio: number) => void,
+  video?: { url?: string | null; title?: string | null; channel?: string | null },
+): Promise<{ id?: string; error?: string }> {
   return new Promise((resolve) => {
     const request = new XMLHttpRequest();
     request.open("POST", apiUrl("/api/jobs/upload"));
@@ -187,6 +206,10 @@ export function uploadVideo(file: File, onProgress: (ratio: number) => void): Pr
     if (token) request.setRequestHeader("Authorization", `Bearer ${token}`);
     request.setRequestHeader("Content-Type", "application/octet-stream");
     request.setRequestHeader("X-Filename", encodeURIComponent(file.name));
+    // La vidéo YouTube d'où vient le fichier : son titre nomme le projet, son lien sert aux sous-titres.
+    if (video?.url) request.setRequestHeader("X-Source-Url", encodeURIComponent(video.url));
+    if (video?.title) request.setRequestHeader("X-Title", encodeURIComponent(video.title));
+    if (video?.channel) request.setRequestHeader("X-Channel", encodeURIComponent(video.channel));
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(event.loaded / event.total);
     };
@@ -229,16 +252,11 @@ export async function resumeAfterAuth(): Promise<{ goTo?: string; error?: string
     const error = await startCheckout(plan);
     return error ? { goTo: "/compte", error } : {};
   }
-  const url = take(PENDING_URL);
-  if (url) {
-    const job = await startJob(url);
-    if (job.id) return { goTo: `/projets/${job.id}` };
-    // Sans offre, le lien est gardé de côté : il sera repris une fois l'abonnement payé.
-    if (job.status === 402) {
-      rememberUrl(url);
-      return { goTo: "/#tarifs" };
-    }
-    return { goTo: "/compte", error: job.error };
+  // Un lien est en attente : avec des shorts disponibles, direction l'envoi de la vidéo ; sinon les offres.
+  // Le lien reste de côté jusqu'à ce que la vidéo soit envoyée.
+  if (pendingUrl()) {
+    const account = await refreshAccount();
+    return { goTo: (account?.credits ?? 0) > 0 ? "/importer" : "/#tarifs" };
   }
   return { goTo: "/compte" };
 }

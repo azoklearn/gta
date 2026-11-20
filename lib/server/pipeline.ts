@@ -9,7 +9,7 @@ import { clipPath, jobDir, posterPath, readJob, settleJob, updateJob } from "./j
 import { renderClip, renderPoster, renderThumbnail } from "./render";
 import { buildAss, readJson3, type Word } from "./subtitles";
 import { writeCopy } from "./titles";
-import { download, downloadSections, fetchInfo, UserError, YouTubeBlocked } from "./youtube";
+import { download, downloadSections, downloadSubtitles, fetchInfo, UserError, YouTubeBlocked } from "./youtube";
 
 const HASHTAGS = ["#gta6", "#gtavi", "#vicecity", "#gaming", "#gtaclips"];
 
@@ -63,6 +63,17 @@ export async function runJob(id: string): Promise<void> {
       source = (await download(job.source.url!, dir, info.subtitleLang, progress, { preview: sections })).video;
     } else {
       source = await findSource(dir);
+      // Fichier envoyé par l'utilisateur pour une vidéo YouTube connue : ses sous-titres sont demandés
+      // à YouTube. S'il refuse, le découpage continue sans eux.
+      if (job.source.url) {
+        const info = await downloadSubtitles(job.source.url, dir).catch((err) => {
+          console.warn(`[gtaclip] ${id} sous-titres YouTube indisponibles : ${String((err as Error).message).slice(0, 160)}`);
+          return null;
+        });
+        if (info && !job.source.channel && info.channel) {
+          job = await updateJob(id, { source: { ...job.source, channel: info.channel } });
+        }
+      }
     }
     if (!source) throw new UserError("La vidéo source est introuvable.");
     const subtitles = (await fs.readdir(dir)).find((f) => f.endsWith(".json3"));

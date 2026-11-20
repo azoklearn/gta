@@ -13,7 +13,7 @@ type Mode = "signup" | "login";
  * Formulaire d'inscription ou de connexion. Après succès, l'utilisateur reprend là où il s'était arrêté.
  *
  * Dans une fenêtre ouverte par-dessus la page (`onModeChange` fourni), passer de l'inscription à la
- * connexion se fait sur place, et `onDone` referme la fenêtre une fois la session ouverte.
+ * connexion se fait sur place, et `onDone` est appelé une fois la session ouverte, à la place de la reprise.
  */
 export function AuthForm({
   mode,
@@ -45,9 +45,13 @@ export function AuthForm({
       setBusy(false);
       return;
     }
+    // Dans une fenêtre, c'est la page qui l'a ouverte qui décide de la suite.
+    if (onDone) {
+      onDone();
+      return;
+    }
     const next = await resumeAfterAuth();
     if (next.error) window.sessionStorage.setItem("viceclip.message", next.error);
-    onDone?.();
     if (next.goTo) router.push(next.goTo);
   }
 

@@ -10,6 +10,7 @@ import { jobDir } from "@/lib/server/jobs";
 import { launchJob } from "@/lib/server/launch";
 import { refuseIfBusy } from "@/lib/server/limits";
 import { refuseIfUnavailable } from "@/lib/server/preflight";
+import { parseYouTubeId } from "@/lib/youtube";
 
 export { OPTIONS } from "@/lib/server/http";
 
@@ -72,9 +73,26 @@ async function receive(request: Request): Promise<Response> {
     return Response.json({ error: "Le fichier reçu est vide." }, { status: 400 });
   }
 
-  const title = rawName.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Vidéo importée";
+  // Le site indique de quelle vidéo YouTube vient le fichier : son titre et sa chaîne servent aux
+  // titres des shorts, et son lien à retrouver les sous-titres.
+  const header = (name: string, max: number) => {
+    try {
+      return decodeURIComponent(request.headers.get(name) ?? "").trim().slice(0, max);
+    } catch {
+      return "";
+    }
+  };
+  const url = header("x-source-url", 300);
+  const videoId = parseYouTubeId(url);
+  const title = header("x-title", 200) || rawName.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Vidéo importée";
+  const source = {
+    kind: "upload" as const,
+    title,
+    channel: header("x-channel", 100) || undefined,
+    ...(videoId ? { videoId, url: `https://www.youtube.com/watch?v=${videoId}` } : {}),
+  };
   try {
-    const job = await launchJob(user, { kind: "upload", title }, id);
+    const job = await launchJob(user, source, id);
     return Response.json({ id: job.id }, { status: 201 });
   } catch (err) {
     await fs.rm(dir, { recursive: true, force: true });

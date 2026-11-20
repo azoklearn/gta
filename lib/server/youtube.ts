@@ -124,14 +124,14 @@ const ATTEMPTS = 3;
  * Relance une commande yt-dlp quand YouTube la refuse : la protection anti-robot
  * se déclenche par intermittence, et une nouvelle tentative passe souvent.
  */
-async function withRetries<T>(task: () => Promise<T>): Promise<T> {
+async function withRetries<T>(task: () => Promise<T>, attempts = ATTEMPTS): Promise<T> {
   for (let attempt = 1; ; attempt++) {
     try {
       return await task();
     } catch (err) {
       const retryable = err instanceof CommandError && /not a bot|Sign in to confirm|HTTP Error 429/i.test(err.stderr);
       // Avec un compte connecté, insister ne sert à rien et expose le compte : une seule tentative.
-      if (!retryable || attempt >= (youtubeAccountReady() ? 1 : ATTEMPTS)) {
+      if (!retryable || attempt >= (youtubeAccountReady() ? 1 : attempts)) {
         if (retryable) console.error(`[gtaclip] cookies YouTube — ${await cookiesReport()}`);
         throw explain(err);
       }
@@ -156,9 +156,9 @@ function pickSubtitles(language: string | undefined, manual: Tracks, automatic: 
   return null;
 }
 
-export async function fetchInfo(url: string): Promise<VideoInfo> {
+export async function fetchInfo(url: string, attempts = ATTEMPTS): Promise<VideoInfo> {
   const base = await baseArgs();
-  const raw = await withRetries(() => capture(config.ytdlp, [...base, "--skip-download", "--dump-single-json", url]));
+  const raw = await withRetries(() => capture(config.ytdlp, [...base, "--skip-download", "--dump-single-json", url]), attempts);
   const info = JSON.parse(raw) as {
     id: string;
     title?: string;
@@ -179,6 +179,26 @@ export async function fetchInfo(url: string): Promise<VideoInfo> {
     isLive: Boolean(info.is_live) || info.live_status === "is_upcoming",
     subtitleLang: pickSubtitles(info.language, info.subtitles ?? {}, info.automatic_captions ?? {}),
   };
+}
+
+/**
+ * Récupère seulement les sous-titres d'une vidéo YouTube, pour un fichier que l'utilisateur a envoyé
+ * lui-même. Une seule tentative : si YouTube refuse, les shorts sortent simplement sans sous-titres.
+ */
+export async function downloadSubtitles(url: string, dir: string): Promise<VideoInfo | null> {
+  const info = await fetchInfo(url, 1);
+  if (!info.subtitleLang) return info;
+  const args = [
+    ...(await baseArgs()),
+    "--skip-download",
+    "--write-subs", "--write-auto-subs",
+    "--sub-langs", info.subtitleLang,
+    "--sub-format", "json3",
+    "-o", "source.%(ext)s",
+    url,
+  ];
+  await withRetries(() => run(config.ytdlp, args, { cwd: dir }), 1);
+  return info;
 }
 
 /** Choix des pistes : H.264 et AAC de préférence, sans dépasser la hauteur d'image demandée. */

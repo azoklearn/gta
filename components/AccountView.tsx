@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { call, pendingUrl, refreshAccount, resumePendingUrl, signOut, useAccount } from "@/lib/account";
+import { call, pendingUrl, refreshAccount, signOut, useAccount } from "@/lib/account";
 import { type Account, findPlan, FREE_TRIAL } from "@/lib/plans";
 import { ButtonLink } from "./Button";
 
@@ -53,8 +53,7 @@ export function AccountView() {
     window.sessionStorage.removeItem("viceclip.message");
     return message;
   });
-  const [waiting, setWaiting] = useState(() => (typeof window === "undefined" ? false : Boolean(pendingUrl())));
-  const [launching, setLaunching] = useState(false);
+  const [waiting] = useState(() => (typeof window === "undefined" ? false : Boolean(pendingUrl())));
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,26 +62,17 @@ export function AccountView() {
     if (status === "guest") router.replace("/connexion");
   }, [status, router]);
 
+  // Paiement confirmé avec une vidéo en attente : direction l'envoi de la vidéo.
+  useEffect(() => {
+    if (payment === "confirmed" && waiting) router.replace("/importer?paiement=ok");
+  }, [payment, waiting, router]);
+
   if (status !== "ready" || !account) {
     return <p className="text-center text-ink-soft">Chargement de ton compte…</p>;
   }
 
   const plan = findPlan(account.plan);
   const until = account.periodEnd ? dateFormat.format(new Date(account.periodEnd)) : null;
-
-  /** Reprend le lien collé avant l'inscription ou le paiement. */
-  async function resume() {
-    setLaunching(true);
-    setError(null);
-    const job = await resumePendingUrl();
-    if (job.id) {
-      router.push(`/projets/${job.id}`);
-      return;
-    }
-    setError(job.error ?? "Le découpage n'a pas pu être lancé.");
-    setWaiting(false);
-    setLaunching(false);
-  }
 
   async function cancel() {
     setBusy(true);
@@ -116,15 +106,10 @@ export function AccountView() {
       {notice && <Banner tone="warn">{notice}</Banner>}
       {waiting && account.credits > 0 && (
         <Banner tone="good">
-          Ta vidéo t&apos;attend : le lien que tu avais collé est prêt à être découpé.{" "}
-          <button
-            type="button"
-            onClick={resume}
-            disabled={launching}
-            className="font-semibold text-white underline decoration-white/40 underline-offset-4 disabled:opacity-60"
-          >
-            {launching ? "Lancement…" : "Lancer le découpage"}
-          </button>
+          Ta vidéo t&apos;attend : il ne reste qu&apos;à nous l&apos;envoyer.{" "}
+          <Link href="/importer" className="font-semibold text-white underline decoration-white/40 underline-offset-4">
+            Envoyer ma vidéo
+          </Link>
         </Banner>
       )}
       {account.paymentFailed && (
@@ -161,7 +146,7 @@ export function AccountView() {
         <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6">
           {account.credits > 0 ? (
             <>
-              <ButtonLink href="/#top">Découper une vidéo</ButtonLink>
+              <ButtonLink href="/importer">Découper une vidéo</ButtonLink>
               <ButtonLink href="/#tarifs" variant="ghost" arrow={false}>
                 {plan ? "Changer d'offre" : "Voir les offres"}
               </ButtonLink>

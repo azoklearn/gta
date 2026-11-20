@@ -9,7 +9,7 @@ import { Plus } from "./Icons";
  * Inscription ou connexion dans une fenêtre ouverte par-dessus la page d'accueil, dès qu'un visiteur
  * a donné le lien de sa vidéo : il ne quitte pas la page, et le découpage reprend aussitôt après.
  */
-export function AuthDialog({ onClose }: { onClose: () => void }) {
+export function AuthDialog({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [mode, setMode] = useState<"signup" | "login">("signup");
 
   useEffect(() => {
@@ -44,11 +44,11 @@ export function AuthDialog({ onClose }: { onClose: () => void }) {
           mode={mode}
           intro={
             mode === "signup"
-              ? "Ta vidéo est prête à être découpée : crée ton compte pour continuer."
-              : "Connecte-toi pour lancer le découpage de ta vidéo."
+              ? "Ta vidéo est prête : crée ton compte pour créer tes shorts."
+              : "Connecte-toi pour créer les shorts de ta vidéo."
           }
           onModeChange={setMode}
-          onDone={onClose}
+          onDone={onDone}
         />
         <button
           type="button"
