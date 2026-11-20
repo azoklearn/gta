@@ -181,8 +181,17 @@ export async function fetchInfo(url: string): Promise<VideoInfo> {
   };
 }
 
+/** Choix des pistes : H.264 et AAC de préférence, sans dépasser la hauteur d'image demandée. */
+function format(height: number): string {
+  return `bv*[height<=${height}][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=${height}]+ba/b[height<=${height}]/b`;
+}
+
+/** Hauteur de l'aperçu téléchargé pour l'analyse : assez pour repérer les moments forts, très léger. */
+const PREVIEW_HEIGHT = 360;
+
 /**
- * Télécharge la vidéo (1080p au maximum) et ses sous-titres dans `dir`.
+ * Télécharge la vidéo entière et ses sous-titres dans `dir` : en haute qualité, ou en simple aperçu
+ * (`preview`) quand seuls les passages retenus seront ensuite récupérés en haute qualité.
  * Renvoie le chemin de la vidéo et, s'ils existent, celui des sous-titres au format json3.
  */
 export async function download(
@@ -190,12 +199,14 @@ export async function download(
   dir: string,
   subtitleLang: string | null,
   onProgress: (p: number) => void,
+  opts: { preview?: boolean; name?: string } = {},
 ): Promise<{ video: string; subtitles: string | null }> {
+  const name = opts.name ?? "source";
   const args = [
     ...(await baseArgs()),
-    "-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b",
+    "-f", format(opts.preview ? PREVIEW_HEIGHT : config.maxHeight),
     "--merge-output-format", "mp4",
-    "-o", "source.%(ext)s",
+    "-o", `${name}.%(ext)s`,
     "--newline",
     "--progress-template", "download:PROGRESS %(progress.downloaded_bytes)s %(progress.total_bytes)s %(progress.total_bytes_estimate)s",
   ];
@@ -222,8 +233,56 @@ export async function download(
   });
 
   const files = await fs.readdir(dir);
-  const video = files.find((f) => /^source\.(mp4|mkv|webm)$/.test(f));
+  const video = files.find((f) => f.startsWith(`${name}.`) && /\.(mp4|mkv|webm)$/.test(f));
   if (!video) throw new UserError("Le téléchargement s'est terminé sans produire de vidéo.");
-  const subtitles = files.find((f) => /^source\..*\.json3$/.test(f));
+  const subtitles = files.find((f) => f.startsWith(`${name}.`) && f.endsWith(".json3"));
   return { video: path.join(dir, video), subtitles: subtitles ? path.join(dir, subtitles) : null };
+}
+
+/**
+ * Télécharge en haute qualité uniquement les passages retenus, un fichier par passage.
+ *
+ * yt-dlp ne récupère que la portion demandée de la vidéo. La coupe est faite à l'image près (le passage
+ * est réencodé au passage, presque sans perte) : le fichier commence exactement au début du passage,
+ * ce qui garde les sous-titres synchronisés.
+ */
+export async function downloadSections(
+  url: string,
+  dir: string,
+  sections: { index: number; start: number; duration: number }[],
+  onProgress: (p: number) => void,
+): Promise<Map<number, string>> {
+  const args = [
+    ...(await baseArgs()),
+    "-f", format(config.maxHeight),
+    "--merge-output-format", "mp4",
+    "--force-keyframes-at-cuts",
+    "--downloader-args", "ffmpeg_o:-c:v libx264 -preset ultrafast -crf 14 -pix_fmt yuv420p -c:a aac -b:a 192k",
+    "-o", "passage-%(section_start)d.%(ext)s",
+    "--newline",
+  ];
+  // Une seconde de marge en fin de passage, pour que le rendu ne manque jamais d'images.
+  for (const section of sections) args.push("--download-sections", `*${section.start}-${section.start + section.duration + 1}`);
+  args.push(url);
+
+  await withRetries(() => {
+    let started = 0;
+    return run(config.ytdlp, args, {
+      cwd: dir,
+      onStdoutLine(line) {
+        if (!line.includes("Destination: passage-")) return;
+        started += 1;
+        onProgress(Math.min(1, (started - 0.5) / sections.length));
+      },
+    });
+  });
+
+  const files = new Map<number, string>();
+  for (const section of sections) {
+    const file = path.join(dir, `passage-${Math.floor(section.start)}.mp4`);
+    if (!(await fs.stat(file).catch(() => null))) throw new Error(`passage ${section.index} manquant après le téléchargement`);
+    files.set(section.index, file);
+  }
+  onProgress(1);
+  return files;
 }

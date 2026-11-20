@@ -9,7 +9,7 @@ import { clipPath, jobDir, posterPath, readJob, settleJob, updateJob } from "./j
 import { renderClip, renderPoster, renderThumbnail } from "./render";
 import { buildAss, readJson3, type Word } from "./subtitles";
 import { writeCopy } from "./titles";
-import { download, fetchInfo, UserError, YouTubeBlocked } from "./youtube";
+import { download, downloadSections, fetchInfo, UserError, YouTubeBlocked } from "./youtube";
 
 const HASHTAGS = ["#gta6", "#gtavi", "#vicecity", "#gaming", "#gtaclips"];
 
@@ -22,6 +22,13 @@ function throttled(id: string) {
     last = now;
     void updateJob(id, { progress }).catch(() => {});
   };
+}
+
+/** Supprime les vidéos de travail d'un traitement : seuls les shorts sont conservés. */
+async function removeFootage(dir: string): Promise<void> {
+  const files = await fs.readdir(dir).catch(() => []);
+  const footage = files.filter((f) => /^(source|complet|passage-)/.test(f) && !f.endsWith(".json3"));
+  await Promise.all(footage.map((f) => fs.rm(path.join(dir, f), { force: true })));
 }
 
 async function findSource(dir: string): Promise<string | null> {
@@ -41,6 +48,8 @@ export async function runJob(id: string): Promise<void> {
     const tooLong = `Cette vidéo dépasse la durée maximale de ${maxMinutes} minutes prévue par ton offre.`;
     let words: Word[] = [];
     let source: string | null;
+    // Téléchargement en deux temps : `source` n'est alors qu'un aperçu en basse qualité, qui sert à l'analyse.
+    const sections = job.source.kind === "youtube" && config.downloadSections;
 
     if (job.source.kind === "youtube") {
       job = await updateJob(id, { status: "running", step: "download", progress: 0 });
@@ -51,7 +60,7 @@ export async function runJob(id: string): Promise<void> {
         source: { ...job.source, title: info.title, channel: info.channel || undefined, duration: info.duration },
       });
       renameJob(id, info.title);
-      source = (await download(job.source.url!, dir, info.subtitleLang, progress)).video;
+      source = (await download(job.source.url!, dir, info.subtitleLang, progress, { preview: sections })).video;
     } else {
       source = await findSource(dir);
     }
@@ -73,12 +82,39 @@ export async function runJob(id: string): Promise<void> {
       ? await audioLevels(source, seconds, (p) => progress(p * 0.45))
       : new Array<number>(seconds).fill(-60);
     const activity = await sceneActivity(source, seconds, (p) => progress(0.45 + p * 0.45));
-    const facecam = await findFacecam(source, media.duration, media.width, media.height);
     const segments = pickSegments(levels, activity, job.reserved ?? config.shortsPerJob, config.clipSeconds);
     if (!segments.length) throw new UserError("Aucun passage exploitable n'a été trouvé dans cette vidéo.");
 
     const passages = segments.map((segment, i) => ({ index: i + 1, start: segment.start, duration: segment.duration }));
-    await renderPoster(source, posterPath(id), segments[0].start + Math.min(2, segments[0].duration / 2)).catch(() => {});
+
+    // Images en haute qualité de chaque passage : dans la vidéo entière si elle est là, sinon dans un
+    // fichier par passage, téléchargé maintenant que les passages sont choisis.
+    let footage = new Map(passages.map((p) => [p.index, { file: source!, start: p.start }]));
+    if (sections) {
+      try {
+        const files = await downloadSections(job.source.url!, dir, passages, (p) => progress(0.9 + p * 0.1));
+        footage = new Map(passages.map((p) => [p.index, { file: files.get(p.index)!, start: 0 }]));
+      } catch (err) {
+        if (err instanceof YouTubeBlocked) throw err;
+        // Le découpage ne doit pas échouer pour cela : la vidéo entière est récupérée, comme avant.
+        console.error(`[gtaclip] ${id} passages en haute qualité indisponibles, téléchargement de la vidéo entière`, err);
+        const full = (await download(job.source.url!, dir, null, () => {}, { name: "complet" })).video;
+        footage = new Map(passages.map((p) => [p.index, { file: full, start: p.start }]));
+      }
+    }
+
+    // La facecam se cherche sur les images en haute qualité. Un passage peut ne pas la montrer
+    // (générique de début) : on essaie alors les suivants.
+    let facecam: Awaited<ReturnType<typeof findFacecam>> = null;
+    for (const file of [...new Set([...footage.values()].map((shot) => shot.file))].slice(0, 3)) {
+      const shape = await probe(file).catch(() => null);
+      if (!shape?.hasVideo) continue;
+      facecam = await findFacecam(file, shape.duration, shape.width, shape.height);
+      if (facecam) break;
+    }
+
+    const first = footage.get(1)!;
+    await renderPoster(first.file, posterPath(id), first.start + Math.min(2, segments[0].duration / 2)).catch(() => {});
     const copy = await writeCopy(source, dir, job.source, passages, words);
 
     const clips: Clip[] = segments.map((segment, i) => {
@@ -106,8 +142,9 @@ export async function runJob(id: string): Promise<void> {
       const assFile = path.join(dir, `short-${clip.index}.ass`);
       if (ass) await fs.writeFile(assFile, ass.text);
       clip.hasSubtitles = Boolean(ass?.spoken);
-      await renderClip(source, output, {
-        start: clip.start,
+      const shot = footage.get(clip.index)!;
+      await renderClip(shot.file, output, {
+        start: shot.start,
         duration: clip.duration,
         facecam,
         assFile: ass ? assFile : undefined,
@@ -118,8 +155,7 @@ export async function runJob(id: string): Promise<void> {
     }
 
     await settleJob(await updateJob(id, { status: "done", progress: 1, clips }));
-    // La vidéo source ne sert plus : seuls les shorts sont conservés.
-    await fs.rm(source, { force: true });
+    await removeFootage(dir);
   } catch (err) {
     const message =
       err instanceof UserError ? err.message : "Le traitement a échoué de façon inattendue. Réessaie avec une autre vidéo.";
@@ -129,7 +165,6 @@ export async function runJob(id: string): Promise<void> {
     await updateJob(id, { status: "error", error: message, youtubeBlocked: err instanceof YouTubeBlocked || undefined })
       .then(settleJob)
       .catch(() => {});
-    const source = await findSource(dir).catch(() => null);
-    if (source) await fs.rm(source, { force: true });
+    await removeFootage(dir);
   }
 }

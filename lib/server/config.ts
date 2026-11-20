@@ -41,6 +41,14 @@ export const config = {
   allowUpload: process.env.VICECLIP_ALLOW_UPLOAD === "1",
   /** Taille maximale d'un fichier importé, en octets. */
   maxUploadBytes: num(process.env.VICECLIP_MAX_UPLOAD_MB, 2048) * 1024 * 1024,
+  /**
+   * Téléchargement en deux temps, avec `VICECLIP_DOWNLOAD_MODE=sections` : la vidéo entière en basse
+   * qualité pour l'analyse, puis seulement les passages retenus en haute qualité (environ quatre fois
+   * moins de volume). Éteint par défaut : ce mode n'a pas encore été vérifié sur de vraies vidéos.
+   */
+  downloadSections: process.env.VICECLIP_DOWNLOAD_MODE === "sections",
+  /** Hauteur maximale de l'image téléchargée en haute qualité (1080 par défaut, 720 pour économiser du volume). */
+  maxHeight: Math.round(num(process.env.VICECLIP_MAX_HEIGHT, 1080)),
   /** Nombre de shorts produits par vidéo. */
   shortsPerJob: Math.round(num(process.env.VICECLIP_SHORTS_PER_JOB, 3)),
   /** Durée visée pour chaque short, en secondes (au-dessus d'une minute pour la rémunération TikTok). */
