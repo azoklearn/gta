@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isSignedIn, rememberUrl, startJob } from "@/lib/account";
-import { PLANS } from "@/lib/plans";
 import { parseYouTubeId } from "@/lib/youtube";
 import { ArrowRight, LinkIcon } from "./Icons";
 
@@ -93,7 +92,7 @@ export function UrlForm({ id = "yt-url" }: { id?: string }) {
       </div>
 
       <p className="text-[13px] text-zinc-500 sm:text-sm">
-        Dès {PLANS[0].price}&nbsp;€ par mois · Sans engagement, résiliable en un clic
+        Sans engagement · Résiliable en un clic
       </p>
     </div>
   );

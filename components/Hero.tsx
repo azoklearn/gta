@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { demo } from "@/lib/demo";
-import { PLANS } from "@/lib/plans";
 import { HeroDemo } from "./HeroDemo";
 import { TikTokGlyph, TrendUp } from "./Icons";
 import { UrlForm } from "./UrlForm";
@@ -87,7 +86,7 @@ export function Hero() {
                 ))}
               </span>
               <span>
-                <strong className="text-gradient font-semibold">Dès {PLANS[0].price}&nbsp;€ par mois</strong>, sans engagement
+                <strong className="text-gradient font-semibold">Shorts prêts à poster</strong> en quelques minutes
               </span>
             </p>
           </div>
