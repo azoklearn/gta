@@ -6,9 +6,11 @@ import { forgetUrl, lookupVideo, pendingUrl, uploadVideo, useAccount, type Video
 import { findPlan, FREE_TRIAL } from "@/lib/plans";
 import { parseYouTubeId } from "@/lib/youtube";
 import { ButtonLink } from "./Button";
-import { Check, Download, Play } from "./Icons";
+import { ArrowRight, Check, Download, Play } from "./Icons";
 
 const MAX_BYTES = 2 * 1024 * 1024 * 1024;
+/** Site de téléchargement proposé dans le tutoriel. Solution provisoire : change-le ici. */
+const DOWNLOAD_SITE = { name: "notube.lol", url: "https://notube.lol" };
 const EXTENSIONS = /\.(mp4|mov|mkv|webm|m4v)$/i;
 
 function length(minutes: number): string {
@@ -45,6 +47,7 @@ export function ImportView() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const videoId = link ? parseYouTubeId(link) : null;
   const video: VideoPreview | null = videoId
@@ -93,6 +96,17 @@ export function ImportView() {
     setError(reply.error ?? "Le fichier n'a pas pu être envoyé.");
     setProgress(null);
     if (input.current) input.current.value = "";
+  }
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch {
+      // Presse-papiers indisponible : le lien reste visible dans la barre d'adresse de YouTube.
+    }
   }
 
   async function copy() {
@@ -151,29 +165,54 @@ export function ImportView() {
           </p>
           <p>
             <strong className="font-semibold text-ink">C&apos;est la vidéo d&apos;un autre créateur&nbsp;:</strong> avec son
-            accord, récupère-la avec un logiciel de téléchargement installé sur ton ordinateur. Avec yt-dlp, gratuit et open
-            source, colle cette commande dans un terminal&nbsp;:
+            accord, le plus simple est de passer par un site de téléchargement.
           </p>
-          <div className="flex items-stretch gap-2">
-            <code className="no-scrollbar min-w-0 flex-1 overflow-x-auto rounded-[12px] border border-white/10 bg-black/60 px-3.5 py-3 font-mono text-[12.5px] whitespace-nowrap text-ink-soft select-all">
-              {command}
-            </code>
-            <button
-              type="button"
-              onClick={copy}
-              className="shrink-0 cursor-pointer rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13.5px] font-semibold text-ink transition hover:bg-white/[0.1]"
+          <ol className="list-decimal space-y-1.5 pl-5">
+            <li>Ouvre {DOWNLOAD_SITE.name} et colle le lien de la vidéo.</li>
+            <li>Choisis le format MP4, puis lance le téléchargement.</li>
+            <li>Garde le fichier obtenu : c&apos;est lui que tu envoies à l&apos;étape 2.</li>
+          </ol>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={DOWNLOAD_SITE.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-[14.5px] font-semibold text-black transition hover:bg-white/90 active:translate-y-px"
             >
-              {copied ? "Copié" : "Copier"}
-            </button>
+              Ouvrir {DOWNLOAD_SITE.name}
+              <ArrowRight className="size-4" />
+            </a>
+            {link && (
+              <button
+                type="button"
+                onClick={copyLink}
+                className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-white/12 bg-white/[0.05] px-5 text-[14.5px] font-semibold text-ink transition hover:bg-white/[0.1]"
+              >
+                {copiedLink ? "Lien copié" : "Copier le lien de la vidéo"}
+              </button>
+            )}
           </div>
           <details className="group rounded-[12px] border border-white/10 bg-white/[0.03] px-4">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3 text-[14.5px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
-              Première fois&nbsp;? Installe yt-dlp avant
+              Autre méthode&nbsp;: yt-dlp, en ligne de commande
               <span aria-hidden="true" className="text-muted transition group-open:rotate-45">
                 +
               </span>
             </summary>
             <div className="space-y-3 pb-4 text-[14px]">
+              <p>Une fois yt-dlp installé, colle cette commande dans un terminal&nbsp;:</p>
+              <div className="flex items-stretch gap-2">
+                <code className="no-scrollbar min-w-0 flex-1 overflow-x-auto rounded-[12px] border border-white/10 bg-black/60 px-3.5 py-3 font-mono text-[12.5px] whitespace-nowrap text-ink-soft select-all">
+                  {command}
+                </code>
+                <button
+                  type="button"
+                  onClick={copy}
+                  className="shrink-0 cursor-pointer rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13.5px] font-semibold text-ink transition hover:bg-white/[0.1]"
+                >
+                  {copied ? "Copié" : "Copier"}
+                </button>
+              </div>
               <p>
                 <strong className="font-semibold text-ink">Sur Windows&nbsp;:</strong> ouvre PowerShell (ou Terminal) et lance
                 la commande ci-dessous, puis ferme et rouvre la fenêtre.

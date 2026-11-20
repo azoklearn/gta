@@ -20,7 +20,7 @@ const QUESTIONS = [
   },
   {
     q: "Comment la vidéo arrive-t-elle chez GTAClip ?",
-    a: "Tu colles le lien YouTube pour que GTAClip reconnaisse la vidéo, tu choisis ton offre, puis tu nous envoies le fichier de la vidéo depuis ton ordinateur. Un guide t'explique comment la récupérer : depuis YouTube Studio si c'est ta vidéo, ou avec un logiciel de téléchargement si c'est celle d'un autre créateur, avec son accord. GTAClip ne télécharge pas la vidéo à ta place.",
+    a: "Tu colles le lien YouTube pour que GTAClip reconnaisse la vidéo, tu choisis ton offre, puis tu nous envoies le fichier de la vidéo depuis ton ordinateur. Un guide t'explique comment la récupérer : depuis YouTube Studio si c'est ta vidéo, ou avec un site ou un logiciel de téléchargement si c'est celle d'un autre créateur, avec son accord. GTAClip ne télécharge pas la vidéo à ta place.",
   },
   {
     q: "Combien de temps prend le découpage ?",
