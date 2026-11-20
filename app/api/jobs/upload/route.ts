@@ -42,6 +42,13 @@ async function receive(request: Request): Promise<Response> {
   if (Number(request.headers.get("content-length") ?? 0) > config.maxUploadBytes) return tooLarge;
   if (!request.body) return Response.json({ error: "Aucun fichier reçu." }, { status: 400 });
   const user = requireUser(request);
+  // Sans short disponible, l'envoi est refusé tout de suite, avant de recevoir un fichier pour rien.
+  if (user.credits <= 0) {
+    return Response.json(
+      { error: user.plan ? "Tu as utilisé tous les shorts de ton offre ce mois-ci." : "Choisis une offre pour lancer ton découpage." },
+      { status: 402 },
+    );
+  }
   const refusal = (await refuseIfUnavailable("upload")) ?? refuseIfBusy();
   if (refusal) return refusal;
 
